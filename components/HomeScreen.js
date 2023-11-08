@@ -1,4 +1,4 @@
-import React from 'react'
+import * as React from 'react';
 import { View , Text, StyleSheet, Button } from 'react-native'
 import MyComponent from './MyComponent';
 import { useNavigation } from '@react-navigation/native';
@@ -13,10 +13,14 @@ function HomeScreen({ navigation }) {
       <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
         <Text>Home Screen</Text>
         <Text>Meu ™!</Text>
-        <MyComponent/>
+        <MyComponent
+            prop="Prop Works!"
+        />
         <Button
             title="Go to Not Home"
-            onPress={() => navigation.navigate('NotHome')}
+            onPress={() => navigation.navigate('NotHome' , {
+                from: 'fromHome!'
+            })}
       />
       </View>
     );
@@ -32,12 +36,12 @@ function HomeScreen({ navigation }) {
 //   );
 // }
 
-const styles = StyleSheet.create({
-    container: {
-      flex: 1,
-      backgroundColor: '#fff',
-      alignItems: 'center',
-      justifyContent: 'center',
-    },
-  });
+// const styles = StyleSheet.create({
+//     container: {
+//       flex: 1,
+//       backgroundColor: '#fff',
+//       alignItems: 'center',
+//       justifyContent: 'center',
+//     },
+//   });
 export default HomeScreen;
