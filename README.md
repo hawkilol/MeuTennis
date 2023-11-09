@@ -13,3 +13,13 @@ cd AwesomeProject
 npx expo start
 
 ```
+
+## Back
+```
+pip install flask
+pip install cookiecutter
+cookiecutter gh:cookiecutter-flask/cookiecutter-flask (ou outro só api rest)
+pip install requirements.txt
+flask run
+
+```
