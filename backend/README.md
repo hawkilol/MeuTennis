@@ -12,6 +12,8 @@ npx create-expo-app AwesomeProject
 cd AwesomeProject
 npx expo start
 
+
+!!! add db to gitignore!!
 ```
 
 # Back
