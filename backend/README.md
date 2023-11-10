@@ -14,7 +14,15 @@ npx expo start
 
 ```
 
-## Back
+# Back
+
+https://www.django-rest-framework.org/tutorial/quickstart/
+```
+python manage.py runserver
+
+```
+
+# Old Flask Back
 ```
 pip install flask
 pip install cookiecutter
