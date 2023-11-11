@@ -12,6 +12,7 @@ npx expo start
 https://www.django-rest-framework.org/tutorial/quickstart/
 ```
 pip install django
+pip install djangorestframework
 pip install django-admin
 python manage.py runserver
 ```
