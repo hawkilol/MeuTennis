@@ -22,6 +22,12 @@ function HomeScreen({ navigation }) {
                 from: 'fromHome!'
             })}
       />
+      <Button
+            title="Go to API Test"
+            onPress={() => navigation.navigate('ApiTest' , {
+                from: 'fromHome!'
+            })}
+      />
       </View>
     );
 }

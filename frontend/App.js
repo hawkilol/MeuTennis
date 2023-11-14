@@ -3,7 +3,7 @@ import { StatusBar } from 'expo-status-bar';
 import { StyleSheet, Text, View } from 'react-native';
 import HomeScreen from './components/HomeScreen';
 import NotHomeScreen from './components/NotHomeScreen';
-
+import ApiTest from './components/ApiTest';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 
@@ -15,6 +15,7 @@ export default function App() {
       <Stack.Navigator initialRouteName="Home">
         <Stack.Screen name="Home" component={HomeScreen} />
         <Stack.Screen name="NotHome" component={NotHomeScreen} />
+        <Stack.Screen name="ApiTest" component={ApiTest} />
       </Stack.Navigator>
     </NavigationContainer>
   );
