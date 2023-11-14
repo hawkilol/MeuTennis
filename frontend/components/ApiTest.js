@@ -39,10 +39,13 @@ const ApiTest = () => {
       setLoading(false);
     }
   };
+//   useEffect(() => {
+//     postTest();
+//   }, []);
   useEffect(() => {
     getMovies();
-    postTest();
   }, []);
+
 
   return (
     <View style={{flex: 1, padding: 24}}>

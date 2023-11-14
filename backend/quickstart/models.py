@@ -2,13 +2,30 @@ from django.db import models
 
 # Create your models here.
 
-# class Book(models.Model):
-#     title = models.CharField(max_length=255)
-#     author = models.CharField(max_length=255)
-#     publication_date = models.DateField()
+class Ranking(models.Model):
+    Updated = models.DateField()
+    RankingID = models.CharField(max_length=255)
+    Name = models.CharField(max_length=128)
+    RankingType = models.CharField(max_length=64)
+    Gender = models.CharField(max_length=32)
+    RankingItems = models.ManyToManyField('RankingItems')
 
-#     def __str__(self):
-#         return self.title
+    def __str__(self):
+        return self.Name
+
+class RankingItem(models.Model):
+    Type = models.CharField(max_length=32)
+    SortOrder = models.IntegerField(max_length=32)
+    Result = models.IntegerField(max_length=255)
+    Rank = models.IntegerField(max_length=255)
+    RankingItemsCode = models.IntegerField(max_length=255)
+    Person = models.ForeignKey('Person', on_delete=models.CASCADE)
+
+class Person(models.Model):
+    Updated = models.DateField()
+    TennisId = models.CharField(max_length=100)
+    StandardGivenName = models.CharField(max_length=64)
+    StandardFamilyName = models.CharField(max_length=64)
 
 
 # python manage.py makemigrations
