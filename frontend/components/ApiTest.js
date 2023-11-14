@@ -16,9 +16,32 @@ const ApiTest = () => {
       setLoading(false);
     }
   };
-
+  const postTest = async () => {
+    try {
+      const response = await 
+      fetch('http://localhost:8000/login', {
+        method: 'POST',
+        headers: {
+          Accept: 'application/json',
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          username: 'john_doecreateuser1',
+          password: 'secure_password',
+        }),
+      });
+      const json = await response.json();
+      console.log(json)
+      setData(json.movies);
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setLoading(false);
+    }
+  };
   useEffect(() => {
     getMovies();
+    postTest();
   }, []);
 
   return (
