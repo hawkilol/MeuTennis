@@ -14,7 +14,10 @@ https://www.django-rest-framework.org/tutorial/quickstart/
 pip install django
 pip install djangorestframework
 pip install django-admin
+or
+pip install requirements.txt
 python manage.py runserver
+
 ```
 
 
