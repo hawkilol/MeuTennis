@@ -15,7 +15,7 @@ pip install django
 pip install djangorestframework
 pip install django-admin
 or
-pip install requirements.txt
+pip install -r requirements.txt
 python manage.py runserver
 
 ```
