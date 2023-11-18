@@ -1,8 +1,5 @@
 from django.db import models
-
-# Create your models here.
-
-from django.db import models
+from django.contrib.auth.models import User
 
 # Create your models here.
 
@@ -20,14 +17,15 @@ class Ranking(models.Model):
 
 class RankingItem(models.Model):
     Type = models.CharField(max_length=32)
-    SortOrder = models.IntegerField(max_length=32)
-    Result = models.IntegerField(max_length=255)
-    Rank = models.IntegerField(max_length=255)
-    RankingItemsCode = models.IntegerField(max_length=255)
+    SortOrder = models.IntegerField()
+    Result = models.IntegerField()
+    Rank = models.IntegerField()
+    RankingItemsCode = models.IntegerField()
     Person = models.ForeignKey('Person', on_delete=models.CASCADE)
     Ranking = models.ForeignKey('Ranking', on_delete=models.CASCADE)
 
 class Person(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
     Updated = models.DateField()
     TennisId = models.CharField(max_length=100)
     StandardGivenName = models.CharField(max_length=64)
@@ -42,4 +40,3 @@ class Person(models.Model):
 # from .models import Book
 
 # admin.site.register(Book)
-
