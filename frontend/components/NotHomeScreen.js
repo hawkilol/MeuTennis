@@ -15,16 +15,20 @@
 //       </View>
 //     );
 // }
-import React from 'react';
-import { SafeAreaView, StyleSheet } from 'react-native';
+import React, {useEffect, useState} from 'react';
+import { SafeAreaView, StyleSheet, Image, ActivityIndicator, FlatList, Text, View } from 'react-native';
 import Animated, {
   useAnimatedSensor,
   useAnimatedStyle,
   SensorType,
 } from 'react-native-reanimated';
-import { Image } from 'react-native';
 
 import { BlurView } from 'expo-blur';
+
+
+//api
+
+
 
 const BORDER_RADIUS = 20;
 const INTENSITY = 30;

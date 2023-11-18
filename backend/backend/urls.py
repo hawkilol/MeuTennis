@@ -30,14 +30,19 @@ from quickstart import views
 router = routers.DefaultRouter()
 router.register(r'users', views.UserViewSet)
 router.register(r'groups', views.GroupViewSet) 
-router.register(r'version', views.YourModelListView, basename='version')
-router.register(r'test', views.TestList, basename='test L')
-# router.register(r'version', views.YourModelListView.get_version)
-# Wire up our API using automatic URL routing.
-# Additionally, we include login URLs for the browsable API.
+# router.register(r'version', views.YourModelListView, basename='version')
+# router.register(r'test', views.TestList, basename='test L')
+# router.register(r'rankings', views.RankingListCreateView, basename='ranking-list')
+router.register(r'rankings', views.RankingViewSet, basename='add-to-ranking')
+# /rankings/1/add_ranking_item/
+router.register(r'rankings/<int:pk>', views.RankingRetrieveUpdateDestroyView, basename='ranking-detail')
+router.register(r'ranking-items', views.RankingItemCreateView, basename='ranking-item-create')
+router.register(r'ranking-items/<int:pk>', views.RankingItemRetrieveUpdateDestroyView, basename='ranking-item-detail')
+router.register(r'person', views.PersonListCreateView, basename='person-list')
+router.register(r'persons/<int:pk>', views.PersonRetrieveUpdateDestroyView, basename='person-detail')
+
 urlpatterns = [
     path('', include(router.urls)),
     path('admin/', admin.site.urls),
     path('api-auth/', include('rest_framework.urls', namespace='rest_framework'))
-    # path('version/', views.get_version, name='get_version')
 ]
