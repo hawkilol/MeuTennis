@@ -2,34 +2,24 @@
 
 
 ## Build
-```
-https://reactnative.dev/docs/environment-setup?package-manager=npm&guide=quickstart&os=linux&platform=android
-```
 
-## Novo Projeto
+
+
+## Frontend
+https://reactnative.dev/docs/environment-setup?package-manager=npm&guide=quickstart&os=linux&platform=android
+
+
 ```
-npx create-expo-app AwesomeProject
-cd AwesomeProject
+npm install
 npx expo start
 
-
-!!! add db to gitignore!!
 ```
-
-# Back
-
+# Backend
 https://www.django-rest-framework.org/tutorial/quickstart/
+
 ```
+
+pip install -r requirements.txt
 python manage.py runserver
-
-```
-
-# Old Flask Back
-```
-pip install flask
-pip install cookiecutter
-cookiecutter gh:cookiecutter-flask/cookiecutter-flask (ou outro só api rest)
-pip install requirements.txt
-flask run
 
 ```
