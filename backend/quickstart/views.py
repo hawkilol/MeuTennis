@@ -38,10 +38,16 @@ class GroupViewSet(viewsets.ModelViewSet):
 #     serializer_class = TestSerializer  # Replace with your actual Test serializer
 
 class RankingViewSet(viewsets.ModelViewSet):
-    queryset = Ranking.objects.all()
+    queryset = Ranking.objects.prefetch_related('rankings').all()
+    print(queryset)
     serializer_class = RankingSerializer
+    def get_queryset(self):
+        # Optionally, you can prefetch_related to optimize database queries
+        return Ranking.objects.prefetch_related('rankings').all()
+
     @action(detail=True, methods=['post'])
     def add_person_to_ranking(self, request, pk=None):
+        print(request.data)
         ranking = self.get_object()
         
         # Get the existing Person instance by ID
@@ -52,6 +58,14 @@ class RankingViewSet(viewsets.ModelViewSet):
             return Response({"error": f"Person with ID {person_id} does not exist."}, status=400)
         
         # Create a new RankingItem with the existing Person
+            #         'Type': request.data.get('Type'),
+            # 'SortOrder': request.data.get('SortOrder'),
+            # 'Result': request.data.get('Result'),
+            # 'Rank': request.data.get('Rank'),
+            # 'RankingItemsCode': request.data.get('RankingItemsCode'),
+
+        # Create a new RankingItem with the existing Person
+
         ranking_item_data = {
             'Type': request.data.get('Type'),
             'SortOrder': request.data.get('SortOrder'),
@@ -65,7 +79,8 @@ class RankingViewSet(viewsets.ModelViewSet):
         ranking_item_serializer = RankingItemSerializer(data=ranking_item_data)
         if ranking_item_serializer.is_valid():
             ranking_item_serializer.save()
-            return Response(ranking_item_serializer.data)
+            return Response(ranking_item_serializer.data, status=status.HTTP_202_ACCEPTED
+)
         else:
             return Response(ranking_item_serializer.errors, status=400)
         
@@ -127,17 +142,15 @@ class PersonListCreateView(viewsets.ModelViewSet):
     serializer_class = PersonSerializer
 
     def create(self, request):
-        print('lol')
         print(request.data)
         serializer = PersonSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        print('lol2')
 
         person = serializer.save()
-        print('lol3')
+        serialized_data = serializer.data
+        serialized_data['person_id'] = person.id
 
-        print(person)    
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serialized_data, status=status.HTTP_201_CREATED)
 
 class PersonRetrieveUpdateDestroyView(viewsets.ModelViewSet):
     queryset = Person.objects.all()

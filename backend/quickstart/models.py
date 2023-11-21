@@ -9,20 +9,20 @@ class Ranking(models.Model):
     Name = models.CharField(max_length=128)
     RankingType = models.CharField(max_length=64)
     Gender = models.CharField(max_length=32)
-    RankingItems = models.ForeignKey('RankingItem', on_delete=models.CASCADE)
+    RankingItems = models.ManyToManyField('RankingItem', related_name='rankings', blank=True)
 
     def __str__(self):
         return self.Name
     
 
 class RankingItem(models.Model):
-    Type = models.CharField(max_length=32)
-    SortOrder = models.IntegerField()
-    Result = models.IntegerField()
-    Rank = models.IntegerField()
-    RankingItemsCode = models.IntegerField()
+    Type = models.CharField(max_length=32, default='Roll Over')
+    SortOrder = models.IntegerField(default='1')
+    Result = models.IntegerField(default='0')
+    Rank = models.IntegerField(default='0')
+    RankingItemsCode = models.IntegerField(default='0')
     Person = models.ForeignKey('Person', on_delete=models.CASCADE)
-    Ranking = models.ForeignKey('Ranking', on_delete=models.CASCADE)
+    Ranking = models.ForeignKey('Ranking', on_delete=models.CASCADE, related_name='rankings')
 
 class Person(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)

@@ -44,5 +44,9 @@ router.register(r'persons/<int:pk>', views.PersonRetrieveUpdateDestroyView, base
 urlpatterns = [
     path('', include(router.urls)),
     path('admin/', admin.site.urls),
-    path('api-auth/', include('rest_framework.urls', namespace='rest_framework'))
+    path('api-auth/', include('rest_framework.urls', namespace='rest_framework')),
+    path('login', views.login_view, name='login'),
+    path('login/', views.login_view, name='login'),
+
+
 ]
