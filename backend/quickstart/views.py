@@ -17,7 +17,7 @@ from django.urls import get_resolver
 
 from django.http import JsonResponse
 from quickstart.models import Ranking, RankingItem, Person
-from quickstart.serializers import RankingSerializer, RankingItemSerializer, PersonSerializer
+from quickstart.serializers import RankingSerializer, RankingItemSerializer, PersonSerializer, RankingItemPersonSerializer, RankingPersonItemsSerializer
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework.authentication import TokenAuthentication
@@ -32,10 +32,13 @@ class GroupViewSet(viewsets.ModelViewSet):
 # class YourModelListView(viewsets.ModelViewSet):
 #     queryset = YourModel.objects.all()
 #     serializer_class = YourModelSerializer  # Replace with your actual Model serializer
-
 # class TestList(viewsets.ModelViewSet):
 #     queryset = Test.objects.all()
 #     serializer_class = TestSerializer  # Replace with your actual Test serializer
+
+class RankingPersonInsideViewSet(viewsets.ModelViewSet):
+    queryset = Ranking.objects.prefetch_related('rankings').all()
+    serializer_class = RankingPersonItemsSerializer
 
 class RankingViewSet(viewsets.ModelViewSet):
     queryset = Ranking.objects.prefetch_related('rankings').all()
@@ -54,6 +57,7 @@ class RankingViewSet(viewsets.ModelViewSet):
         person_id = request.data.get('person_id')
         try:
             person = Person.objects.get(pk=person_id)
+            print(person.__dict__)
         except Person.DoesNotExist:
             return Response({"error": f"Person with ID {person_id} does not exist."}, status=400)
         

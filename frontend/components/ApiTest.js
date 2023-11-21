@@ -1,69 +1,110 @@
-import React, {useEffect, useState} from 'react';
-import {ActivityIndicator, FlatList, Text, View} from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { ActivityIndicator, FlatList, Text, View, StyleSheet, Button } from 'react-native';
 
 const ApiTest = () => {
   const [isLoading, setLoading] = useState(true);
-  const [data, setData] = useState([]);
+  const [rankingData, setRankingData] = useState(null);
 
-  const getMovies = async () => {
+  const getRankingData = async () => {
     try {
-      const response = await fetch('https://reactnative.dev/movies.json');
+      const response = await fetch('http://localhost:8000/ranking/4/');
       const json = await response.json();
-      setData(json.movies);
+      setRankingData(json);
     } catch (error) {
       console.error(error);
     } finally {
       setLoading(false);
     }
   };
-  const postTest = async () => {
-    try {
-      const response = await 
-      fetch('http://localhost:8000/login', {
-        method: 'POST',
-        headers: {
-          Accept: 'application/json',
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          username: 'john_doecreateuser1',
-          password: 'secure_password',
-        }),
-      });
-      const json = await response.json();
-      console.log(json)
-      setData(json.movies);
-    } catch (error) {
-      console.error(error);
-    } finally {
-      setLoading(false);
-    }
+
+  const handleRefresh = () => {
+    setLoading(true);
+    getRankingData();
   };
-//   useEffect(() => {
-//     postTest();
-//   }, []);
+
   useEffect(() => {
-    getMovies();
+    getRankingData();
   }, []);
-
-
   return (
-    <View style={{flex: 1, padding: 24}}>
+    <View style={styles.container}>
+      <View style={styles.buttonContainer}>
+        <Button title="Refresh" onPress={handleRefresh} />
+      </View>
       {isLoading ? (
         <ActivityIndicator />
       ) : (
-        <FlatList
-          data={data}
-          keyExtractor={({id}) => id}
-          renderItem={({item}) => (
-            <Text>
-              {item.title}, {item.releaseYear}
-            </Text>
-          )}
-        />
+        <View style={styles.tableContainer}>
+          <FlatList
+            style={styles.flatList}
+            data={rankingData?.RankingItems || []}
+            keyExtractor={(item) => item.id.toString()}
+            renderItem={({ item, index }) => (
+              <View style={[styles.itemContainer, { backgroundColor: index % 2 === 0 ? '#f0f0f0' : '#ffffff' }]}>
+                <Text style={styles.rank}>{item.Rank}</Text>
+                <Text style={styles.playerName}>
+                  {item.Person.StandardGivenName} {item.Person.StandardFamilyName}
+                </Text>
+                <Text style={styles.type}>{item.Type}</Text>
+                <Text style={styles.result}>Result: {item.Result}</Text>
+              </View>
+            )}
+          />
+        </View>
       )}
     </View>
   );
 };
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    padding: 24,
+  },
+  buttonContainer: {
+    marginBottom: 10,
+  },
+  tableContainer: {
+    borderRadius: 10,
+    overflow: 'hidden',
+    backgroundColor: '#ffffff',
+    elevation: 3, // Add elevation for shadow (Android)
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+  },
+  flatList: {
+    marginTop: 20,
+    padding: 10,
+  },
+  itemContainer: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 15,
+    paddingHorizontal: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: '#ccc',
+  },
+  rank: {
+    marginRight: 10,
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#333',
+  },
+  playerName: {
+    flex: 1,
+    fontSize: 16,
+    color: '#333',
+  },
+  type: {
+    fontSize: 16,
+    color: '#555',
+  },
+  result: {
+    fontSize: 16,
+    color: '#555',
+  },
+});
 
 export default ApiTest;
