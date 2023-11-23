@@ -16,8 +16,8 @@ from django.urls import get_resolver
 
 
 from django.http import JsonResponse
-from quickstart.models import Ranking, RankingItem, Person
-from quickstart.serializers import RankingSerializer, RankingItemSerializer, PersonSerializer, RankingItemPersonSerializer, RankingPersonItemsSerializer
+from quickstart.models import Ranking, RankingItem, Person, Challenge
+from quickstart.serializers import RankingSerializer, RankingItemSerializer, PersonSerializer, RankingItemPersonSerializer, RankingPersonItemsSerializer, ChallengeSerializer
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework.authentication import TokenAuthentication
@@ -45,7 +45,6 @@ class RankingViewSet(viewsets.ModelViewSet):
     print(queryset)
     serializer_class = RankingSerializer
     def get_queryset(self):
-        # Optionally, you can prefetch_related to optimize database queries
         return Ranking.objects.prefetch_related('rankings').all()
 
     @action(detail=True, methods=['post'])
@@ -60,15 +59,6 @@ class RankingViewSet(viewsets.ModelViewSet):
             print(person.__dict__)
         except Person.DoesNotExist:
             return Response({"error": f"Person with ID {person_id} does not exist."}, status=400)
-        
-        # Create a new RankingItem with the existing Person
-            #         'Type': request.data.get('Type'),
-            # 'SortOrder': request.data.get('SortOrder'),
-            # 'Result': request.data.get('Result'),
-            # 'Rank': request.data.get('Rank'),
-            # 'RankingItemsCode': request.data.get('RankingItemsCode'),
-
-        # Create a new RankingItem with the existing Person
 
         ranking_item_data = {
             'Type': request.data.get('Type'),
@@ -127,7 +117,16 @@ class RankingViewSet(viewsets.ModelViewSet):
             # If there's an error, delete the created Person
             person.delete()
             return Response(ranking_item_serializer.errors, status=400)
-    
+        
+class ChallengeViewSet(viewsets.ModelViewSet):
+    queryset =  Challenge.objects.prefetch_related('challenges_as_challenger', 'challenges_as_challenger').all()
+    serializer_class = ChallengeSerializer
+
+def list(self, request):
+    # Use the prefetched ranking items in the serializer
+    serializer = self.get_serializer(self.get_queryset(), many=True)
+    print(serializer.data)
+    return Response(serializer.data)
 
 class RankingRetrieveUpdateDestroyView(viewsets.ModelViewSet):
     queryset = Ranking.objects.all()

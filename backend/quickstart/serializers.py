@@ -1,6 +1,6 @@
 from django.contrib.auth.models import User, Group
 
-from quickstart.models import Ranking, RankingItem, Person
+from quickstart.models import Ranking, RankingItem, Person, Challenge
 from rest_framework import serializers
 
 
@@ -90,3 +90,14 @@ class RankingPersonItemsSerializer(serializers.ModelSerializer):
     class Meta:
         model = Ranking
         fields = '__all__'
+
+class ChallengeSerializer(serializers.ModelSerializer):
+    Challenger = serializers.PrimaryKeyRelatedField(queryset=RankingItem.objects.all())
+    Challenged = serializers.PrimaryKeyRelatedField(queryset=RankingItem.objects.all())
+    class Meta:
+        model = Challenge
+        fields = ['Challenger', 'Challenged']
+
+
+
+

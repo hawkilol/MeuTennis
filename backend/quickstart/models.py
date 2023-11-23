@@ -23,6 +23,9 @@ class RankingItem(models.Model):
     RankingItemsCode = models.IntegerField(default='0')
     Person = models.ForeignKey('Person', on_delete=models.CASCADE)
     Ranking = models.ForeignKey('Ranking', on_delete=models.CASCADE, related_name='rankings')
+    Challenging = models.ManyToManyField('Challenge', related_name='challenges_as_challenger')
+    BeingChallenged = models.ManyToManyField('Challenge', related_name='challenges_as_challenged')
+
 
 class Person(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
@@ -30,6 +33,10 @@ class Person(models.Model):
     TennisId = models.CharField(max_length=100)
     StandardGivenName = models.CharField(max_length=64)
     StandardFamilyName = models.CharField(max_length=64)
+
+class Challenge(models.Model):
+    Challenger =  models.ForeignKey('RankingItem', on_delete=models.CASCADE, related_name = 'challenges_as_challenger')
+    Challenged =  models.ForeignKey('RankingItem', on_delete=models.CASCADE, related_name= 'challenges_as_challenged')
 
 
 # python manage.py makemigrations
