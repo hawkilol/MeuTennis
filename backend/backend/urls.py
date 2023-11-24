@@ -34,8 +34,9 @@ router.register(r'groups', views.GroupViewSet)
 # router.register(r'test', views.TestList, basename='test L')
 # router.register(r'rankings', views.RankingListCreateView, basename='ranking-list')
 router.register(r'rankings', views.RankingViewSet, basename='add-to-ranking')
-router.register(r'ranking', views.RankingPersonInsideViewSet, basename='add-to-ranking')
-router.register(r'challenge', views.ChallengeViewSet, basename='create-challenge')
+router.register(r'ranking', views.RankingPersonInsideViewSet, basename='ranking-nested')
+router.register(r'challenges', views.ChallengeViewSet, basename='challenge-id')
+router.register(r'challenge', views.ChallengeNestedViewSet, basename='challenge-nested')
 
 # /rankings/1/add_ranking_item/
 router.register(r'rankings/<int:pk>', views.RankingRetrieveUpdateDestroyView, basename='ranking-detail')

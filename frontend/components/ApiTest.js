@@ -4,6 +4,7 @@ import { ActivityIndicator, FlatList, Text, View, StyleSheet, Button } from 'rea
 const ApiTest = () => {
   const [isLoading, setLoading] = useState(true);
   const [rankingData, setRankingData] = useState(null);
+  console.log("123")
 
   const getRankingData = async () => {
     try {

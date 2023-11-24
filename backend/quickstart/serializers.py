@@ -44,22 +44,21 @@ class PersonSerializer(serializers.ModelSerializer):
         )
         return person_instance
     
+
+class ChallengeSerializer(serializers.ModelSerializer):
+    Challenger = serializers.PrimaryKeyRelatedField(queryset=RankingItem.objects.all())
+    Challenged = serializers.PrimaryKeyRelatedField(queryset=RankingItem.objects.all())
+    class Meta:
+        model = Challenge
+        fields = ['Challenger', 'Challenged']
+
 class RankingItemPersonSerializer(serializers.ModelSerializer):
     Person = PersonSerializer()
+    Challenging = ChallengeSerializer(many=True, read_only=True, source='challenges_as_challenger')
+    BeingChallenged = ChallengeSerializer(many=True, read_only=True, source='challenges_as_challenged')
     class Meta:
         model = RankingItem
         fields = '__all__'
-    # def create(self, validated_data):
-    #     print(validated_data)
-    #     user_id = validated_data.pop('user_id')
-    #     print(user_id)
-    #     user_instance = User.objects.get('user_id')
-    #     print(user_instance)
-    #     person_instance = Person.objects.create(
-    #         user=user_instance,
-    #         **validated_data
-    #     )
-    #     return person_instance
             
 
 class RankingItemSerializer(serializers.ModelSerializer):
@@ -85,15 +84,16 @@ class RankingSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
+
 class RankingPersonItemsSerializer(serializers.ModelSerializer):
     RankingItems = RankingItemPersonSerializer(many=True, read_only=True, source='rankings')
     class Meta:
         model = Ranking
         fields = '__all__'
 
-class ChallengeSerializer(serializers.ModelSerializer):
-    Challenger = serializers.PrimaryKeyRelatedField(queryset=RankingItem.objects.all())
-    Challenged = serializers.PrimaryKeyRelatedField(queryset=RankingItem.objects.all())
+class ChallengeNestedSerializer(serializers.ModelSerializer):
+    Challenger = RankingItemPersonSerializer(read_only=True)
+    Challenged = RankingItemPersonSerializer(read_only=True)
     class Meta:
         model = Challenge
         fields = ['Challenger', 'Challenged']

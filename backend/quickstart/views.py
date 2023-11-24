@@ -17,7 +17,7 @@ from django.urls import get_resolver
 
 from django.http import JsonResponse
 from quickstart.models import Ranking, RankingItem, Person, Challenge
-from quickstart.serializers import RankingSerializer, RankingItemSerializer, PersonSerializer, RankingItemPersonSerializer, RankingPersonItemsSerializer, ChallengeSerializer
+from quickstart.serializers import RankingSerializer, RankingItemSerializer, PersonSerializer, RankingItemPersonSerializer, RankingPersonItemsSerializer, ChallengeSerializer, ChallengeNestedSerializer
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework.authentication import TokenAuthentication
@@ -52,7 +52,6 @@ class RankingViewSet(viewsets.ModelViewSet):
         print(request.data)
         ranking = self.get_object()
         
-        # Get the existing Person instance by ID
         person_id = request.data.get('person_id')
         try:
             person = Person.objects.get(pk=person_id)
@@ -119,8 +118,12 @@ class RankingViewSet(viewsets.ModelViewSet):
             return Response(ranking_item_serializer.errors, status=400)
         
 class ChallengeViewSet(viewsets.ModelViewSet):
-    queryset =  Challenge.objects.prefetch_related('challenges_as_challenger', 'challenges_as_challenger').all()
+    queryset =  Challenge.objects.prefetch_related('challenges_as_challenger', 'challenges_as_challenged').all()
     serializer_class = ChallengeSerializer
+
+class ChallengeNestedViewSet(viewsets.ModelViewSet):
+    queryset =  Challenge.objects.prefetch_related('challenges_as_challenger', 'challenges_as_challenged').all()
+    serializer_class = ChallengeNestedSerializer
 
 def list(self, request):
     # Use the prefetched ranking items in the serializer
