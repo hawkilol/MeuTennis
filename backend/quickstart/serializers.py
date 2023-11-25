@@ -62,6 +62,8 @@ class RankingItemPersonSerializer(serializers.ModelSerializer):
             
 
 class RankingItemSerializer(serializers.ModelSerializer):
+    Challenging = ChallengeSerializer(many=True, read_only=True, source='challenges_as_challenger')
+    BeingChallenged = ChallengeSerializer(many=True, read_only=True, source='challenges_as_challenged')
     class Meta:
         model = RankingItem
         fields = '__all__'

@@ -77,6 +77,7 @@ class RankingViewSet(viewsets.ModelViewSet):
         else:
             return Response(ranking_item_serializer.errors, status=400)
         
+
     @action(detail=True, methods=['post'])
     def add_ranking_item(self, request, pk=None):
         ranking = self.get_object()
@@ -117,10 +118,17 @@ class RankingViewSet(viewsets.ModelViewSet):
             person.delete()
             return Response(ranking_item_serializer.errors, status=400)
         
+    
+
+@authentication_classes([TokenAuthentication, JWTAuthentication])
+@permission_classes([IsAuthenticated])
 class ChallengeViewSet(viewsets.ModelViewSet):
     queryset =  Challenge.objects.prefetch_related('challenges_as_challenger', 'challenges_as_challenged').all()
     serializer_class = ChallengeSerializer
 
+
+@authentication_classes([TokenAuthentication, JWTAuthentication])
+@permission_classes([IsAuthenticated])
 class ChallengeNestedViewSet(viewsets.ModelViewSet):
     queryset =  Challenge.objects.prefetch_related('challenges_as_challenger', 'challenges_as_challenged').all()
     serializer_class = ChallengeNestedSerializer
@@ -135,6 +143,18 @@ class RankingRetrieveUpdateDestroyView(viewsets.ModelViewSet):
     queryset = Ranking.objects.all()
     serializer_class = RankingSerializer
 
+
+
+class RankingItemViewSet(viewsets.ModelViewSet):
+    queryset = RankingItem.objects.all()
+    serializer_class = RankingItemSerializer
+
+    @action(detail=True, methods=['get'])
+    def challengers(self, request, pk=None):
+        ranking_item = self.get_object()
+        challengers = ranking_item.challenges_as_challenged.all()
+        serializer = ChallengeNestedSerializer(challengers, many=True)
+        return Response(serializer.data)
 class RankingItemCreateView(viewsets.ModelViewSet):
     queryset = RankingItem.objects.all()
     serializer_class = RankingItemSerializer
