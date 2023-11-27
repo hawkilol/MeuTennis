@@ -47,3 +47,24 @@ class Challenge(models.Model):
 # from .models import Book
 
 # admin.site.register(Book)
+# {
+#     "Updated": "2023-01-01",
+#     "Type": "Barrel Roll",
+#     "SortOrder": 1,
+#     "Result": 500,
+#     "Rank": 1,
+#     "RankingItemsCode": "1",
+#     "Person": {
+
+#     "Updated": "2023-01-01",
+#     "TennisId": "personTennisid",
+#     "StandardGivenName": "kalil",
+#     "StandardFamilyName": "Person1",
+#     "user": {
+#         "username": "kalilPerson3",
+#         "password": "kalilPerson3",
+#         "email": "kalilPerson1@gmail.com"
+#     }
+# }
+      
+# }

@@ -116,6 +116,12 @@ function HomeScreen({ navigation, prop }) {
                         from: 'fromHome!'
                     })}
                 />
+                <Button
+                    title="Go to register page"
+                    onPress={() => navigation.navigate('RegisterPersonScreen', {
+                        from: 'fromHome!'
+                    })}
+                />
                 <Logout>
 
                 </Logout>

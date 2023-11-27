@@ -92,7 +92,7 @@ class RankingViewSet(viewsets.ModelViewSet):
         ranking = self.get_object()
         
         # Create a new Person
-        person_serializer = PersonSerializer(data=request.data.get('person'))
+        person_serializer = PersonSerializer(data=request.data.get('Person'))
         if person_serializer.is_valid():
             person = person_serializer.save()
         else:

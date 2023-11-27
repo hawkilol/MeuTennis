@@ -14,6 +14,7 @@ import Login from './components/Login'
 import appConfig from './tamagui.config'
 import { UserProvider } from './components/UserContext';
 import ChallengesScreen from './components/Challenges';
+import RegisterPersonScreen from './components/RegisterPersonScreen';
 
 const Stack = createNativeStackNavigator();
 export default function App() {
@@ -29,6 +30,7 @@ export default function App() {
         <Stack.Screen name="TamaguiDemo" component={Demo} />
         <Stack.Screen name="Login" component={Login} />
         <Stack.Screen name="ChallengesScreen" component={ChallengesScreen} />
+        <Stack.Screen name="RegisterPersonScreen" component={RegisterPersonScreen} />
       </Stack.Navigator>
     </NavigationContainer>
   </UserProvider>
