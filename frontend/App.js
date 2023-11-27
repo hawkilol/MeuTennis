@@ -8,18 +8,17 @@ import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import Demo from './components/Tamagui';
 import { Theme } from 'tamagui' // or '@tamagui/core'
-import '@tamagui/core/reset.css'
 import Login from './components/Login'
-import { TamaguiProvider } from 'tamagui'
+// import { TamaguiProvider } from 'tamagui'
 // import tamaguiConfig from './tamagui.config'
 import appConfig from './tamagui.config'
 import { UserProvider } from './components/UserContext';
+import ChallengesScreen from './components/Challenges';
 
 const Stack = createNativeStackNavigator();
 export default function App() {
   return (
    <UserProvider>
-    <TamaguiProvider config={appConfig}>
 
     
     <NavigationContainer>
@@ -29,9 +28,9 @@ export default function App() {
         <Stack.Screen name="ApiTest" component={ApiTest} />
         <Stack.Screen name="TamaguiDemo" component={Demo} />
         <Stack.Screen name="Login" component={Login} />
+        <Stack.Screen name="ChallengesScreen" component={ChallengesScreen} />
       </Stack.Navigator>
     </NavigationContainer>
-    </TamaguiProvider>
   </UserProvider>
   );
 }

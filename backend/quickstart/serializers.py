@@ -44,6 +44,16 @@ class PersonSerializer(serializers.ModelSerializer):
         )
         return person_instance
     
+class PersonReadSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Person
+        fields = (
+            'Updated',
+            'TennisId',
+            'StandardGivenName',
+            'StandardFamilyName',
+        )
+        
 
 class ChallengeSerializer(serializers.ModelSerializer):
     Challenger = serializers.PrimaryKeyRelatedField(queryset=RankingItem.objects.all())
@@ -60,7 +70,11 @@ class RankingItemPersonSerializer(serializers.ModelSerializer):
         model = RankingItem
         fields = '__all__'
             
-
+class RankingItemNestedPersonSerializer(serializers.ModelSerializer):
+    Person = PersonReadSerializer()
+    class Meta:
+        model = RankingItem
+        fields = '__all__'
 class RankingItemSerializer(serializers.ModelSerializer):
     Challenging = ChallengeSerializer(many=True, read_only=True, source='challenges_as_challenger')
     BeingChallenged = ChallengeSerializer(many=True, read_only=True, source='challenges_as_challenged')
@@ -96,6 +110,14 @@ class RankingPersonItemsSerializer(serializers.ModelSerializer):
 class ChallengeNestedSerializer(serializers.ModelSerializer):
     Challenger = RankingItemPersonSerializer(read_only=True)
     Challenged = RankingItemPersonSerializer(read_only=True)
+    class Meta:
+        model = Challenge
+        fields = ['Challenger', 'Challenged']
+
+class ChallengedNestedSerializer(serializers.ModelSerializer):
+    Challenger = RankingItemNestedPersonSerializer(read_only=True)
+    Challenged = RankingItemNestedPersonSerializer(read_only=True)
+
     class Meta:
         model = Challenge
         fields = ['Challenger', 'Challenged']

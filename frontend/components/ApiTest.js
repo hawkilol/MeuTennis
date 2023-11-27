@@ -1,10 +1,22 @@
 import React, { useEffect, useState } from 'react';
-import { ActivityIndicator, FlatList, Text, View, StyleSheet, Button } from 'react-native';
+import { ActivityIndicator, FlatList, Text, View, StyleSheet, Button, TouchableOpacity } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import axios from 'axios';
 
+const isReactNative = process.env.REACT_NATIVE === 'true';
+
+let storage;
+if(isReactNative){
+    storage = localStorage
+}
+else{
+    storage = AsyncStorage
+}
 const ApiTest = () => {
+  const navigation = useNavigation();
   const [isLoading, setLoading] = useState(true);
   const [rankingData, setRankingData] = useState(null);
-  console.log("123")
 
   const getRankingData = async () => {
     try {
@@ -23,9 +35,46 @@ const ApiTest = () => {
     getRankingData();
   };
 
+  const startChallenge = async (rankingItemId) => {
+    try {
+      const token = await storage.getItem('access_token');
+
+      const response = await axios.post('http://localhost:8000/rankingItem/register_challenge/', 
+      {
+        Challenged: rankingItemId,
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${token}`, 
+          
+        },
+      }
+        
+        // Add any other data required by the API
+      );
+
+      // Challenge started successfully
+      console.log('Challenge started successfully', response.data);
+    } catch (error) {
+      // Handle errors
+      console.error('Error while starting challenge:', error.message);
+    }
+  };
+
+
+  const handleChallengePress = (item) => {
+    // Navigate to the challenge route with the selected item
+    console.log("apitest")
+
+    console.log(item)
+    startChallenge(item.id)
+    // navigation.navigate('ChallengesScreen', { rankingItem: item });
+  };
+
   useEffect(() => {
     getRankingData();
   }, []);
+  
   return (
     <View style={styles.container}>
       <View style={styles.buttonContainer}>
@@ -40,14 +89,16 @@ const ApiTest = () => {
             data={rankingData?.RankingItems || []}
             keyExtractor={(item) => item.id.toString()}
             renderItem={({ item, index }) => (
-              <View style={[styles.itemContainer, { backgroundColor: index % 2 === 0 ? '#f0f0f0' : '#ffffff' }]}>
-                <Text style={styles.rank}>{item.Rank}</Text>
-                <Text style={styles.playerName}>
-                  {item.Person.StandardGivenName} {item.Person.StandardFamilyName}
-                </Text>
-                <Text style={styles.type}>{item.Type}</Text>
-                <Text style={styles.result}>Result: {item.Result}</Text>
-              </View>
+              <TouchableOpacity onPress={() => handleChallengePress(item)}>
+                <View style={[styles.itemContainer, { backgroundColor: index % 2 === 0 ? '#f0f0f0' : '#ffffff' }]}>
+                  <Text style={styles.rank}>{item.Rank}</Text>
+                  <Text style={styles.playerName}>
+                    {item.Person.StandardGivenName} {item.Person.StandardFamilyName}
+                  </Text>
+                  <Text style={styles.type}>{item.Type}</Text>
+                  <Text style={styles.result}>Result: {item.Result}</Text>
+                </View>
+              </TouchableOpacity>
             )}
           />
         </View>
@@ -55,6 +106,8 @@ const ApiTest = () => {
     </View>
   );
 };
+
+
 
 const styles = StyleSheet.create({
   container: {
