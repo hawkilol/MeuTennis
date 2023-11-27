@@ -14,7 +14,7 @@ const RegisterPersonScreen = () => {
 
   const handleRegisterPerson = async () => {
     try {
-      const currentDate = new Date().toISOString().slice(0,10);
+      const currentDate = new Date().toISOString();
       console.log(currentDate)
       axios.defaults.baseURL = 'http://localhost:8000/'
       const response = await axios.post('rankings/4/add_create_person_to_ranking/', {

@@ -56,7 +56,7 @@ function HomeScreen({ navigation, prop }) {
                 localUsername = await storage.getItem('username');
 
                 navigation.setOptions({
-                    title: `Welcome, ${username || (localUsername ? localUsername : 'Guest')}`,
+                    title: `Bem-vindo, ${username || (localUsername ? localUsername : 'Guest')}`,
                 });
                 
             } catch (error) {
@@ -72,7 +72,7 @@ function HomeScreen({ navigation, prop }) {
 
         <Theme name='purple'>
             <View style={styles.container}>
-                <Text style={styles.text}>Welcome, {username || (localUsername ? localUsername : 'Guest')},</Text>
+                <Text style={styles.text}>Bem-vindo, {username || (localUsername ? localUsername : 'Guest')},</Text>
             </View>
             <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
                 <Text>Home Screen</Text>

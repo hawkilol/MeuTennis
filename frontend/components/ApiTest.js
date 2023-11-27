@@ -1,23 +1,37 @@
 import React, { useEffect, useState } from 'react';
-import { ActivityIndicator, FlatList, Text, View, StyleSheet, Button, TouchableOpacity } from 'react-native';
+import {
+  ActivityIndicator,
+  FlatList,
+  Text,
+  View,
+  StyleSheet,
+  Button,
+  TouchableOpacity,
+  Modal,
+} from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
+import CustomModal from './Modal'
 
 const isReactNative = process.env.REACT_NATIVE === 'true';
 
 let storage;
-if(isReactNative){
-    storage = localStorage
+if (isReactNative) {
+  storage = localStorage;
+} else {
+  storage = AsyncStorage;
 }
-else{
-    storage = AsyncStorage
-}
+
 const ApiTest = () => {
   const navigation = useNavigation();
   const [isLoading, setLoading] = useState(true);
   const [rankingData, setRankingData] = useState(null);
+  const [isChallengeSuccessModalVisible, setChallengeSuccessModalVisible] = useState(false)
+  const [ChallengedName, setChallengedName] = useState(null)
 
+
+  console.log(isChallengeSuccessModalVisible)
   const getRankingData = async () => {
     try {
       const response = await fetch('http://localhost:8000/ranking/4/');
@@ -30,51 +44,47 @@ const ApiTest = () => {
     }
   };
 
-  const handleRefresh = () => {
-    setLoading(true);
-    getRankingData();
-  };
-
-  const startChallenge = async (rankingItemId) => {
+  const startChallenge = async (rankingItemId, ChallengedName) => {
     try {
       const token = await storage.getItem('access_token');
-
-      const response = await axios.post('http://localhost:8000/rankingItem/register_challenge/', 
-      {
-        Challenged: rankingItemId,
-      },
-      {
-        headers: {
-          Authorization: `Bearer ${token}`, 
-          
+      const response = await axios.post(
+        'http://localhost:8000/rankingItem/register_challenge/',
+        {
+          Challenged: rankingItemId,
         },
-      }
-        
-        // Add any other data required by the API
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
       );
-
       // Challenge started successfully
       console.log('Challenge started successfully', response.data);
+      setChallengedName(ChallengedName)
+      setChallengeSuccessModalVisible(true);
     } catch (error) {
       // Handle errors
       console.error('Error while starting challenge:', error.message);
     }
   };
 
-
   const handleChallengePress = (item) => {
     // Navigate to the challenge route with the selected item
-    console.log("apitest")
-
-    console.log(item)
-    startChallenge(item.id)
+    console.log('apitest');
+    console.log(item);
+    startChallenge(item.id, item.Person.StandardGivenName.toString());
     // navigation.navigate('ChallengesScreen', { rankingItem: item });
+  };
+
+  const handleRefresh = () => {
+    setLoading(true);
+    getRankingData();
   };
 
   useEffect(() => {
     getRankingData();
   }, []);
-  
+
   return (
     <View style={styles.container}>
       <View style={styles.buttonContainer}>
@@ -90,8 +100,16 @@ const ApiTest = () => {
             keyExtractor={(item) => item.id.toString()}
             renderItem={({ item, index }) => (
               <TouchableOpacity onPress={() => handleChallengePress(item)}>
-                <View style={[styles.itemContainer, { backgroundColor: index % 2 === 0 ? '#f0f0f0' : '#ffffff' }]}>
-                  <Text style={styles.rank}>{item.Rank}</Text>
+                <View
+                  style={[
+                    styles.itemContainer,
+                    { backgroundColor: index % 2 === 0 ? '#f0f0f0' : '#ffffff' },
+                  ]}
+                >
+                  <Text style={styles.rank}>{item.Rank }</Text>
+                  <Text>
+
+                  </Text>
                   <Text style={styles.playerName}>
                     {item.Person.StandardGivenName} {item.Person.StandardFamilyName}
                   </Text>
@@ -103,11 +121,16 @@ const ApiTest = () => {
           />
         </View>
       )}
+
+      {/* Challenge Success Modal */}
+      <CustomModal
+        isVisible={isChallengeSuccessModalVisible}
+        onClose={ () => setChallengeSuccessModalVisible(false)}
+        modalText={ ChallengedName + " foi desafiado"}
+      />
     </View>
   );
 };
-
-
 
 const styles = StyleSheet.create({
   container: {
@@ -158,6 +181,24 @@ const styles = StyleSheet.create({
   result: {
     fontSize: 16,
     color: '#555',
+  },
+  // Modal styles
+  modalContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  modalContent: {
+    backgroundColor: 'white',
+    padding: 22,
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderRadius: 4,
+    borderColor: 'rgba(0, 0, 0, 0.1)',
+  },
+  modalText: {
+    fontSize: 18,
+    marginBottom: 20,
   },
 });
 

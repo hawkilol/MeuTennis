@@ -4,7 +4,7 @@ from django.contrib.auth.models import User
 # Create your models here.
 
 class Ranking(models.Model):
-    Updated = models.DateField()
+    Updated = models.DateTimeField
     RankingID = models.CharField(max_length=255)
     Name = models.CharField(max_length=128)
     RankingType = models.CharField(max_length=64)
@@ -29,7 +29,7 @@ class RankingItem(models.Model):
 
 class Person(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
-    Updated = models.DateField()
+    Updated = models.DateTimeField()
     TennisId = models.CharField(max_length=100)
     StandardGivenName = models.CharField(max_length=64)
     StandardFamilyName = models.CharField(max_length=64)
