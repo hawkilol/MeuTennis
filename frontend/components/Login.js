@@ -1,10 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { View, TextInput, Button, AsyncStorage, LocalStorage, Alert } from 'react-native';
+import { View, TextInput, Button, AsyncStorage, LocalStorage } from 'react-native';
 import axios from 'axios';
 import { useUser } from './UserContext';
-
+import CustomModal from './Modal'
+import alert from './Alert'
 const isReactNative = process.env.REACT_NATIVE === 'true';
 const storage = isReactNative ? require('@react-native-async-storage/async-storage').default : window.localStorage;
+
+
 const decodeJWT = (token) => {
     try {
       // Extract the payload from the token (between the second and third dots)
@@ -38,6 +41,8 @@ const LoginScreen = () => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const { updateUsername } = useUser();
+  const [isSuccessModalVisible, setSuccessModalVisible] = useState(false)
+
 
   const handleLogin = async () => {
     try {
@@ -63,9 +68,11 @@ const LoginScreen = () => {
       updateUsername(decodedJWT.username)
       // Navigate to the main screen or perform other actions
       // e.g., navigation.navigate('MainScreen');
+      setSuccessModalVisible(true);
     } catch (error) {
-      console.error('Login failed', error);
-      Alert.alert('Login Failed', 'Please check your username and password.');
+      console.log("123")
+      // console.error('Login failed', error);
+      alert('Login Failed', 'Please check your username and password.');
     }
   };
 
@@ -83,6 +90,11 @@ const LoginScreen = () => {
         onChangeText={(text) => setPassword(text)}
       />
       <Button title="Login" onPress={handleLogin} />
+      <CustomModal
+        isVisible={isSuccessModalVisible}
+        onClose={ () => setSuccessModalVisible(false)}
+        modalText={"Login realizado com sucesso"}
+      />
     </View>
   );
 };

@@ -97,28 +97,30 @@ class RankingViewSet(viewsets.ModelViewSet):
             person = person_serializer.save()
         else:
             return Response(person_serializer.errors, status=400)
-        
+        try:
         # Create a new RankingItem with the created Person
-        ranking_item_data = {
-            'Type': request.data.get('Type'),
-            'SortOrder': request.data.get('SortOrder'),
-            'Result': request.data.get('Result'),
-            'Rank': request.data.get('Rank'),
-            'RankingItemsCode': request.data.get('RankingItemsCode'),
-            'Person': person.id,
-            'Ranking': ranking.id,
-        }
-
-        ranking_item_serializer = RankingItemSerializer(data=ranking_item_data)
-        if ranking_item_serializer.is_valid():
-            ranking_item_serializer.save()
-            return Response(ranking_item_serializer.data)
-        else:
-            # If there's an error, delete the created Person
-            person.delete()
-            return Response(ranking_item_serializer.errors, status=400)
+            ranking_item_data = {
+                'Type': request.data.get('Type'),
+                'SortOrder': request.data.get('SortOrder'),
+                'Result': request.data.get('Result'),
+                'Rank': request.data.get('Rank'),
+                'RankingItemsCode': request.data.get('RankingItemsCode'),
+                'Person': person.id,
+                'Ranking': ranking.id,
+            }
         
-    
+            ranking_item_serializer = RankingItemSerializer(data=ranking_item_data)
+            if ranking_item_serializer.is_valid():
+                ranking_item_serializer.save()
+                return Response(ranking_item_serializer.data)
+            else:
+                # If there's an error, delete the created Person
+                person.delete()
+                return Response(ranking_item_serializer.errors, status=400)
+        
+        except Exception as e:
+            person.delete()
+            return Response({"error": str(e)}, status=500)
 
 @authentication_classes([TokenAuthentication, JWTAuthentication])
 @permission_classes([IsAuthenticated])

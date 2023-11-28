@@ -36,7 +36,17 @@ class Person(models.Model):
 
 class Challenge(models.Model):
     Challenger =  models.ForeignKey('RankingItem', on_delete=models.CASCADE, related_name = 'challenges_as_challenger')
-    Challenged =  models.ForeignKey('RankingItem', on_delete=models.CASCADE, related_name= 'challenges_as_challenged')
+    Challenged =  models.ForeignKey('RankingItem', on_delete=models.CASCADE, related_name = 'challenges_as_challenged')
+    statuses = [
+            ("Pendente", "Pendente"),
+            ("Aceito", "Aceito"),
+            ("Concluido", "Concluido"),
+            ("Cancelado", "Cancelado"),
+        ]
+
+    Status = models.CharField(max_length=10, choices=statuses, default='Pendente')
+    Message = models.CharField(max_length=255, default='Mensagem de desafi')
+    Score = models.CharField(max_length=255, default="0-0 0-0")
 
 
 # python manage.py makemigrations

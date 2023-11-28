@@ -110,9 +110,10 @@ class RankingPersonItemsSerializer(serializers.ModelSerializer):
 class ChallengeNestedSerializer(serializers.ModelSerializer):
     Challenger = RankingItemPersonSerializer(read_only=True)
     Challenged = RankingItemPersonSerializer(read_only=True)
+
     class Meta:
         model = Challenge
-        fields = ['Challenger', 'Challenged']
+        fields = ['Challenger', 'Challenged', 'Status', 'Message']
 
 class ChallengedNestedSerializer(serializers.ModelSerializer):
     Challenger = RankingItemNestedPersonSerializer(read_only=True)
