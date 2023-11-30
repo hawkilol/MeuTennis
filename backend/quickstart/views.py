@@ -11,13 +11,13 @@ from rest_framework import status
 from rest_framework.views import APIView
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from django.contrib.auth import authenticate, login
-from django.http import JsonResponse, HttpResponse
+from django.http import Http404, JsonResponse, HttpResponse
 from django.urls import get_resolver
 
 
 from django.http import JsonResponse
-from quickstart.models import Ranking, RankingItem, Person
-from quickstart.serializers import RankingSerializer, RankingItemSerializer, PersonSerializer, RankingItemPersonSerializer, RankingPersonItemsSerializer
+from quickstart.models import Ranking, RankingItem, Person, Challenge
+from quickstart.serializers import RankingSerializer, RankingItemSerializer, PersonSerializer, RankingItemPersonSerializer, RankingPersonItemsSerializer, ChallengeSerializer, ChallengeNestedSerializer, ChallengedNestedSerializer
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework.authentication import TokenAuthentication
@@ -45,7 +45,6 @@ class RankingViewSet(viewsets.ModelViewSet):
     print(queryset)
     serializer_class = RankingSerializer
     def get_queryset(self):
-        # Optionally, you can prefetch_related to optimize database queries
         return Ranking.objects.prefetch_related('rankings').all()
 
     @action(detail=True, methods=['post'])
@@ -53,22 +52,12 @@ class RankingViewSet(viewsets.ModelViewSet):
         print(request.data)
         ranking = self.get_object()
         
-        # Get the existing Person instance by ID
         person_id = request.data.get('person_id')
         try:
             person = Person.objects.get(pk=person_id)
             print(person.__dict__)
         except Person.DoesNotExist:
             return Response({"error": f"Person with ID {person_id} does not exist."}, status=400)
-        
-        # Create a new RankingItem with the existing Person
-            #         'Type': request.data.get('Type'),
-            # 'SortOrder': request.data.get('SortOrder'),
-            # 'Result': request.data.get('Result'),
-            # 'Rank': request.data.get('Rank'),
-            # 'RankingItemsCode': request.data.get('RankingItemsCode'),
-
-        # Create a new RankingItem with the existing Person
 
         ranking_item_data = {
             'Type': request.data.get('Type'),
@@ -88,6 +77,7 @@ class RankingViewSet(viewsets.ModelViewSet):
         else:
             return Response(ranking_item_serializer.errors, status=400)
         
+
     @action(detail=True, methods=['post'])
     def add_ranking_item(self, request, pk=None):
         ranking = self.get_object()
@@ -102,36 +92,159 @@ class RankingViewSet(viewsets.ModelViewSet):
         ranking = self.get_object()
         
         # Create a new Person
-        person_serializer = PersonSerializer(data=request.data.get('person'))
+        person_serializer = PersonSerializer(data=request.data.get('Person'))
         if person_serializer.is_valid():
             person = person_serializer.save()
         else:
             return Response(person_serializer.errors, status=400)
-        
+        try:
         # Create a new RankingItem with the created Person
-        ranking_item_data = {
-            'Type': request.data.get('Type'),
-            'SortOrder': request.data.get('SortOrder'),
-            'Result': request.data.get('Result'),
-            'Rank': request.data.get('Rank'),
-            'RankingItemsCode': request.data.get('RankingItemsCode'),
-            'Person': person.id,
-            'Ranking': ranking.id,
-        }
-
-        ranking_item_serializer = RankingItemSerializer(data=ranking_item_data)
-        if ranking_item_serializer.is_valid():
-            ranking_item_serializer.save()
-            return Response(ranking_item_serializer.data)
-        else:
-            # If there's an error, delete the created Person
+            ranking_item_data = {
+                'Type': request.data.get('Type'),
+                'SortOrder': request.data.get('SortOrder'),
+                'Result': request.data.get('Result'),
+                'Rank': request.data.get('Rank'),
+                'RankingItemsCode': request.data.get('RankingItemsCode'),
+                'Person': person.id,
+                'Ranking': ranking.id,
+            }
+        
+            ranking_item_serializer = RankingItemSerializer(data=ranking_item_data)
+            if ranking_item_serializer.is_valid():
+                ranking_item_serializer.save()
+                return Response(ranking_item_serializer.data)
+            else:
+                # If there's an error, delete the created Person
+                person.delete()
+                return Response(ranking_item_serializer.errors, status=400)
+        
+        except Exception as e:
             person.delete()
-            return Response(ranking_item_serializer.errors, status=400)
+            return Response({"error": str(e)}, status=500)
+
+@authentication_classes([TokenAuthentication, JWTAuthentication])
+@permission_classes([IsAuthenticated])
+class ChallengeViewSet(viewsets.ModelViewSet):
+    queryset =  Challenge.objects.prefetch_related('challenges_as_challenger', 'challenges_as_challenged').all()
+    serializer_class = ChallengeSerializer
+
+
+# user_ranking_items = RankingItem.objects.get(Person__user=request.user)
+#     print("user_ranking_items")
+#     Challenges = Challenge.objects.filter(Challenger=user_ranking_items)
+#     print("request")
+#     print(request)
+#     # Challenges = Challenge.objects.filter(Challenger__person__user=user)
+#     serializer = ChallengeNestedSerializer(Challenges, many=True)
+#     return Response(serializer.data)
+@authentication_classes([TokenAuthentication, JWTAuthentication])
+@permission_classes([IsAuthenticated])
+class ChallengeNestedViewSet(viewsets.ModelViewSet):
     
+    queryset =  Challenge.objects.prefetch_related('challenges_as_challenger', 'challenges_as_challenged').all()
+    serializer_class = ChallengeNestedSerializer
+
+def list(self, request):
+    # Use the prefetched ranking items in the serializer
+    serializer = self.get_serializer(self.get_queryset(), many=True)
+    print(serializer.data)
+    return Response(serializer.data)
 
 class RankingRetrieveUpdateDestroyView(viewsets.ModelViewSet):
     queryset = Ranking.objects.all()
     serializer_class = RankingSerializer
+
+
+
+class RankingItemViewSet(viewsets.ModelViewSet):
+    queryset = RankingItem.objects.all()
+    serializer_class = RankingItemSerializer
+
+    @action(detail=True, methods=['get'])
+    def challenges(self, request, pk=None):
+        ranking_item = self.get_object()
+        challengers = ranking_item.challenges_as_challenged.all()
+        print("challengers")
+        print(challengers)
+        # serializer = ChallengeNestedSerializer(challengers, many=True)
+        serializer = ChallengedNestedSerializer(challengers, many=True)
+
+        return Response(serializer.data)
+    
+    @action(detail=False, methods=['post'])
+    def register_challenge(self, request):
+        try:
+            # Get the RankingItem associated with the current user
+            print(request)
+            print(request.data)
+            print(request.user)
+            ranking_item = RankingItem.objects.get(Person__user=request.user)
+
+
+            print(request.data.get('Challenged'))
+            # Create a new challenge
+            challenge_data = {
+                'Challenger':  ranking_item.id,
+                'Challenged': request.data.get('Challenged'),  # Assuming you send the ID of the challenged RankingItem in the request
+                # You may need to adjust the data based on your actual model structure
+            }
+
+            serializer = ChallengeSerializer(data=challenge_data)
+            if serializer.is_valid():
+                serializer.save()
+                return Response(serializer.data, status=201)
+            return Response(serializer.errors, status=400)
+        except RankingItem.DoesNotExist:
+            raise Http404("RankingItem for the current user does not exist.")
+        except Exception as e:
+            return Response({"error": str(e)}, status=500)
+
+    
+# quickstart/views.py
+
+
+# @api_view(['GET'])
+# @permission_classes([IsAuthenticated])
+# def current_user_challenges(request):
+#     # user = request.user
+#     user_ranking_items = RankingItem.objects.get(Person__user=request.user)
+#     print("user_ranking_items")
+#     Challenges = Challenge.objects.filter(Challenger=user_ranking_items)
+#     print("request")
+#     print(request)
+#     # Challenges = Challenge.objects.filter(Challenger__person__user=user)
+#     serializer = ChallengeNestedSerializer(Challenges, many=True)
+#     return Response(serializer.data)
+
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def current_user_challenging(request):
+    # user = request.user
+    print("request")
+    print(request.__dict__)
+    user_ranking_items = RankingItem.objects.get(Person__user=request.user)
+    print("user_ranking_items")
+    Challenges = Challenge.objects.filter(Challenger=user_ranking_items)
+    
+    # Challenges = Challenge.objects.filter(Challenger__person__user=user)
+    serializer = ChallengeNestedSerializer(Challenges, many=True)
+    return Response(serializer.data)
+
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def current_user_challenges(request):
+    # user = request.user
+    print("request")
+    print(request.__dict__)
+    user_ranking_items = RankingItem.objects.get(Person__user=request.user)
+    print("user_ranking_items")
+    Challenges = Challenge.objects.filter(Challenged=user_ranking_items)
+    
+    # Challenges = Challenge.objects.filter(Challenger__person__user=user)
+    serializer = ChallengeNestedSerializer(Challenges, many=True)
+    return Response(serializer.data)
 
 class RankingItemCreateView(viewsets.ModelViewSet):
     queryset = RankingItem.objects.all()
@@ -172,6 +285,7 @@ def generate_tokens(user):
         refresh['email'] = user.email
         refresh['first_name'] = user.first_name
         refresh['last_name'] = user.last_name
+
         return {
             'refresh': str(refresh),
             'access': str(refresh.access_token),
