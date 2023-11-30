@@ -230,6 +230,7 @@ def current_user_challenges(request):
     # Challenges = Challenge.objects.filter(Challenger__person__user=user)
     serializer = ChallengeNestedSerializer(Challenges, many=True)
     return Response(serializer.data)
+
 class RankingItemCreateView(viewsets.ModelViewSet):
     queryset = RankingItem.objects.all()
     serializer_class = RankingItemSerializer

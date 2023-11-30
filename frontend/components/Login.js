@@ -1,9 +1,17 @@
 import React, { useState, useEffect } from 'react';
-import { View, TextInput, Button, AsyncStorage, LocalStorage } from 'react-native';
+import { View, TextInput, Button, AsyncStorage, LocalStorage, NativeModules, Platform, Image } from 'react-native';
 import axios from 'axios';
 import { useUser } from './UserContext';
 import CustomModal from './Modal'
 import alert from './Alert'
+
+// import { toast } from '@baronha/ting';
+// ...
+const options = {
+  title: 'Done 😎',
+  message: 'Successful!!',
+};
+
 const isReactNative = process.env.REACT_NATIVE === 'true';
 const storage = isReactNative ? require('@react-native-async-storage/async-storage').default : window.localStorage;
 
@@ -72,7 +80,8 @@ const LoginScreen = () => {
     } catch (error) {
       console.log("123")
       // console.error('Login failed', error);
-      alert('Login Failed', 'Please check your username and password.');
+      //toast(options); // easy to use
+      //alert('Login Failed', 'Please check your username and password.');
     }
   };
 
