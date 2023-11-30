@@ -219,13 +219,28 @@ class RankingItemViewSet(viewsets.ModelViewSet):
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
-def current_user_challenges(request):
+def current_user_challenging(request):
     # user = request.user
     print("request")
     print(request.__dict__)
     user_ranking_items = RankingItem.objects.get(Person__user=request.user)
     print("user_ranking_items")
     Challenges = Challenge.objects.filter(Challenger=user_ranking_items)
+    
+    # Challenges = Challenge.objects.filter(Challenger__person__user=user)
+    serializer = ChallengeNestedSerializer(Challenges, many=True)
+    return Response(serializer.data)
+
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def current_user_challenges(request):
+    # user = request.user
+    print("request")
+    print(request.__dict__)
+    user_ranking_items = RankingItem.objects.get(Person__user=request.user)
+    print("user_ranking_items")
+    Challenges = Challenge.objects.filter(Challenged=user_ranking_items)
     
     # Challenges = Challenge.objects.filter(Challenger__person__user=user)
     serializer = ChallengeNestedSerializer(Challenges, many=True)
