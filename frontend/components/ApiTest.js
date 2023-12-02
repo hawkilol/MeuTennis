@@ -13,6 +13,7 @@ import { useNavigation } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
 import CustomModal from './Modal'
+import { Socket } from 'react-native-tcp-socket';
 
 const isReactNative = process.env.REACT_NATIVE === 'true';
 
@@ -22,6 +23,38 @@ if (isReactNative) {
 } else {
   storage = AsyncStorage;
 }
+
+// const options = {
+//   port: `50010`,
+//   host: '127.0.0.1',
+//   localAddress: '127.0.0.1',
+//   reuseAddress: true,
+//   // localPort: 20000,
+//   // interface: "wifi",
+// };
+
+// // Create socket
+// const client = Socket.createConnection(options, () => {
+//   // Write on the socket
+//   client.write('Hello server!');
+
+//   // Close socket
+//   client.destroy();
+// });
+
+// client.on('data', function(data) {
+//   console.log('message was received', data);
+// });
+
+// client.on('error', function(error) {
+//   console.log(error);
+// });
+
+// client.on('close', function(){
+//   console.log('Connection closed!');
+// });
+
+
 
 const ApiTest = () => {
   const navigation = useNavigation();

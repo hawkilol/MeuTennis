@@ -21,6 +21,7 @@ Including another URLconf
 # urlpatterns = [
 #     path('admin/', admin.site.urls),
 # ]
+import socket
 
 from django.contrib import admin
 from django.urls import include, path
@@ -54,4 +55,7 @@ urlpatterns = [
     path('login/', views.login_view, name='login'),
     path('current_user_challenging/', views.current_user_challenging, name='login'),
     path('current_user_challenges/', views.current_user_challenges, name='login'),
+    path('make_server_socket/', views.make_server_socket, name='socket'),
+    
 ]
+print("main")
