@@ -5,12 +5,13 @@ import axios from 'axios';
 import Wrapper from "@/components/wrapper";
 import CustomModal from "@/components/Modal";
 import Login from '@/components/Login';
+import SocketClient from '@/components/SocketClient';
+
 const ApiTest = () => {
   const [isLoading, setLoading] = useState(true);
   const [rankingData, setRankingData] = useState(null);
   const [isChallengeSuccessModalVisible, setChallengeSuccessModalVisible] = useState(false);
   const [challengedName, setChallengedName] = useState(null);
-  const [isLoginModalVisible, setLoginModalVisible] = useState(false);
 
   console.log(isChallengeSuccessModalVisible);
 
@@ -62,6 +63,12 @@ const ApiTest = () => {
 
   useEffect(() => {
     getRankingData();
+    SocketClient.sendData('Hello, server!');
+
+    // Close the connection when the component is unmounted
+    return () => {
+      SocketClient.closeConnection();
+    };
   }, []);
 
   return (
@@ -96,13 +103,14 @@ const ApiTest = () => {
                 <button className= "bg-blue-500 text-white px-4 py-2 rounded-md" onClick={() => handleChallengePress(item)}>
                   Challenge
                 </button>
-                <button className="ml-3 bg-blue-500 text-white px-2 py-1" onClick={() => setLoginModalVisible(true)}>
-                  Login
-                </button>
               </li>
             ))}
           </ul>
+          <button className= "bg-blue-500 text-white px-4 py-2 rounded-md" onClick={() => handleChallengePress(item)}>
+                  socket
+          </button>
         </div>
+        
       )}
        
       {/* Challenge Success Modal */}
@@ -111,15 +119,7 @@ const ApiTest = () => {
         onClose={() => setChallengeSuccessModalVisible(false)}
         modalText={`${challengedName} foi desafiado`}
       />
-      <CustomModal
-        isVisible={isLoginModalVisible}
-        onClose={() => setLoginModalVisible(false)}
-        modalText={''}
-      >
-        <div>
-          <Login/>
-        </div>
-      </CustomModal>
+
     </div>
     </Wrapper>
       </section>
