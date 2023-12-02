@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import { Provider } from "@/components/provider";
 
 import localFont from "next/font/local";
+import Wrapper from "@/components/wrapper";
 
 const spaceMono = localFont({
   src: [
@@ -91,7 +92,14 @@ export default function RootLayout({
           <main
             className={`text-zinc-700 bg-white dark:text-zinc-400 dark:bg-black`}
           >
+            {/* <section className="flex flex-col lg:flex-row">
+    <section className="flex h-screen w-full flex-col justify-between p-9 lg:h-auto">
+      <Wrapper> */}
             {children}
+            {/* </Wrapper>
+            </section>
+            </section> */}
+
           </main>
         </Provider>
       </body>

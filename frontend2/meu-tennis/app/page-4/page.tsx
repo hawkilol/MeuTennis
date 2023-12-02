@@ -70,9 +70,13 @@ const ApiTest = () => {
       <Wrapper>
     <div className="container mx-auto p-4">
       <div className="mb-10">
-        <button className="bg-blue-500 text-white px-4 py-2" onClick={handleRefresh}>
+        <button
+          className="bg-blue-500 text-white px-4 py-2 rounded-md"
+          onClick={handleRefresh}
+        >
           Refresh
         </button>
+
       </div>
       {isLoading ? (
         <div className="text-center">
@@ -89,7 +93,7 @@ const ApiTest = () => {
                 </span>
                 <span className="text-gray-600">{item.Type}</span>
                 <span className="text-gray-600 ml-auto">Result: {item.Result}</span>
-                <button className="ml-3 bg-blue-500 text-white px-2 py-1" onClick={() => handleChallengePress(item)}>
+                <button className= "bg-blue-500 text-white px-4 py-2 rounded-md" onClick={() => handleChallengePress(item)}>
                   Challenge
                 </button>
                 <button className="ml-3 bg-blue-500 text-white px-2 py-1" onClick={() => setLoginModalVisible(true)}>

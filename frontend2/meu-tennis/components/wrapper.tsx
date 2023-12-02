@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
 import ThemeToggle from "./theme-toggle";
+import LogInOut from "./LogInOut";
 import { Button } from "./ui/button";
 import Link from "next/link";
 
@@ -10,8 +11,11 @@ const SECTION_DATA = [
   { label: 1, href: "/", isFirst: true, isLast: false },
   { label: 2, href: "/page-2", isFirst: true, isLast: false },
   { label: 3, href: "/page-3", isFirst: false, isLast: false },
-  { label: 4, href: "/page-4", isFirst: false, isLast: true }
+  { label: 4, href: "/page-4", isFirst: false, isLast: false },
+  { label: 5, href: "/page-5", isFirst: false, isLast: true },
+  
 ];
+let username = localStorage.getItem('username')
 
 export default function Wrapper({ children }: { children: React.ReactNode }) {
   const [currentIndex, setCurrentIndex] = useState(1);
@@ -42,7 +46,7 @@ export default function Wrapper({ children }: { children: React.ReactNode }) {
           href="/"
           className={`flex items-center text-2xl font-bold dark:text-white`}
         >
-          Kami.{" "}
+          Bem-vindo {username}{" "}
           <span
             className={`text-sm font-bold group ml-2 inline-block rounded-3xl bg-[#fafafa] px-3 text-black`}
           >
@@ -51,6 +55,7 @@ export default function Wrapper({ children }: { children: React.ReactNode }) {
         </Link>
 
         <ThemeToggle />
+        <LogInOut/>
       </div>
       {children}
       <div className="flex w-full items-center justify-between">
