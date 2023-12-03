@@ -3,6 +3,8 @@
 import Image from "next/image";
 import Wrapper from "@/components/wrapper";
 import { Button } from "@/components/ui/button";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
 
 import manWIthRobot from "@/public/images/man-with-robot.png";
 
@@ -15,27 +17,20 @@ export default function Home() {
             <span
               className={`-mt-14 inline-block text-[64px] font-bold text-black dark:text-white`}
             >
-              02
+              algo aqui
             </span>
             <p className="pb-6 font-medium">
-              Ada Lovelace, an English mathematician and writer, is considered
-              the world&apos;s first computer programmer. She wrote the
-              world&apos;s first algorithm to be processed by a machine,
-              specifically for Charles Babbage&apos;s Analytical Engine, which
-              is considered the first general-purpose computer
+              kkkk
             </p>
 
             <div className="">
-              <Button size="xl" className="w-full font-bold" variant="brand">
-                <a
-                  href="https://github.com/lucky-chap/kaminari"
-                  target="_blank"
-                  rel="noreferrer"
-                  className="pb-1 dark:text-zinc-800 text-zinc-100"
+              <Link href={'/page-5'} passHref>
+                <Button
+                  className={`text-sm font-bold rounded-3xl bg-zinc-900 text-white dark:bg-white px-7 py-2 dark:text-black`}
                 >
-                  Repo
-                </a>{" "}
-              </Button>
+                  <span className="">Next</span>
+                </Button>
+              </Link>
             </div>
           </div>
         </Wrapper>

@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import axios from 'axios';
 import { useRouter } from 'next/navigation';
+import CustomModal from './Modal';
 
 const RegisterPersonScreen = () => {
   const [username, setUsername] = useState('');
@@ -11,6 +12,8 @@ const RegisterPersonScreen = () => {
   const [TennisId, setTennisId] = useState('');
   const [StandardGivenName, setStandardGivenName] = useState('');
   const [StandardFamilyName, setStandardFamilyName] = useState('');
+  const [isRegisterModalVisible, setRegisterModalVisible] = useState(false);
+  
   const router = useRouter();
 
   const handleRegisterPerson = async () => {
@@ -38,8 +41,8 @@ const RegisterPersonScreen = () => {
       });
 
       // Handle successful registration
-      console.log('Registration successful', response);
-      alert('Registration Successful');
+    //   console.log('Registration successful', response);
+    //   alert('Registration Successful');
 
       // Reset input fields
       setUsername('');
@@ -50,7 +53,8 @@ const RegisterPersonScreen = () => {
       setStandardFamilyName('');
 
       // Redirect to login page after successful registration
-      router.push('/login');
+      setRegisterModalVisible(true)
+      router.push('/');
     } catch (error) {
       console.error('Register failed', error);
       alert('Register Failed');
@@ -129,6 +133,11 @@ const RegisterPersonScreen = () => {
           </button>
         </form>
       </div>
+      <CustomModal
+        isVisible={isRegisterModalVisible}
+        onClose={() => setRegisterModalVisible(false)}
+        modalText={`Registrado com sucesso`}
+      />
     </div>
   );
 };

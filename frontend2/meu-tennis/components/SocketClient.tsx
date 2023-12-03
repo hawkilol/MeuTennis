@@ -3,7 +3,7 @@ class SocketClient {
     this.isConnected = false;
     this.serverAddress = 'ws://127.0.0.1:50012';
     // this.connectToServer();
-    this.connectSendClose(data)
+    this.connectSendRecvStayOpen(data)
   }
 
   connectToServer() {
@@ -54,7 +54,61 @@ class SocketClient {
       this.isConnected = true;
       
       this.sendData(data);
+      // this.closeConnection()
+    });
+
+    this.client.addEventListener('message', (event) => {
+      const data = event.data;
+      console.log(`Received data from server: ${data}`);
       this.closeConnection()
+
+    });
+
+    this.client.addEventListener('close', () => {
+      console.log('Connection closed');
+      this.isConnected = false;
+    });
+
+    this.client.addEventListener('error', (err) => {
+      console.error(`Error: ${err.message}`);
+    });
+
+
+  }
+  connectSendRecvClose(data : string) {
+    this.client = new WebSocket(this.serverAddress);
+
+    this.client.addEventListener('open', () => {
+      console.log('Connected to server!');
+      this.isConnected = true;
+      
+      this.sendData(data);
+    });
+
+    this.client.addEventListener('message', (event) => {
+      const data = event.data;
+      console.log(`Received data from server: ${data}`);
+      this.closeConnection()
+
+    });
+
+    this.client.addEventListener('close', () => {
+      console.log('Connection closed');
+      this.isConnected = false;
+    });
+
+    this.client.addEventListener('error', (err) => {
+      console.error(`Error: ${err.message}`);
+    });
+  }
+  connectSendRecvStayOpen(data : string) {
+    this.client = new WebSocket(this.serverAddress);
+
+    this.client.addEventListener('open', () => {
+      console.log('Connected to server!');
+      this.isConnected = true;
+      
+      this.sendData(data);
     });
 
     this.client.addEventListener('message', (event) => {
@@ -70,6 +124,7 @@ class SocketClient {
     this.client.addEventListener('error', (err) => {
       console.error(`Error: ${err.message}`);
     });
+    
 
 
   }

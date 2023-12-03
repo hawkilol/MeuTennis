@@ -23,9 +23,17 @@ from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework.authentication import TokenAuthentication
 import socket
 import asyncio
-
+import json
+from asgiref.sync import sync_to_async  # Import sync_to_async
+from channels.layers import get_channel_layer
 
 import websockets
+
+
+
+
+connected_clients = set()
+
 # import websockets
 class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
@@ -45,7 +53,57 @@ class GroupViewSet(viewsets.ModelViewSet):
 class RankingPersonInsideViewSet(viewsets.ModelViewSet):
     queryset = Ranking.objects.prefetch_related('rankings').all()
     serializer_class = RankingPersonItemsSerializer
+    
+class getRankingJson():
+    # queryset = Ranking.objects.prefetch_related('rankings').all()
+    # serializer_class = RankingPersonItemsSerializer
+    def getRanking(ranking_id):
+        try:
+            ranking = Ranking.objects.prefetch_related('rankings').get(id=ranking_id)
+            serializer = RankingPersonItemsSerializer(ranking)
+            data = serializer.data
+            return JsonResponse(data)
+        except Ranking.DoesNotExist:
+            return JsonResponse({"error": f"Ranking with ID {ranking_id} does not exist."}, status=404)
+        except Exception as e:
+            return JsonResponse({"error": str(e)}, status=500)
 
+
+def getRankingSync(ranking_id):
+    try:
+        ranking = Ranking.objects.prefetch_related('rankings').get(id=ranking_id)
+        serializer = RankingPersonItemsSerializer(ranking)
+        data = serializer.data
+        return data
+    except Ranking.DoesNotExist:
+        raise Exception(f"Ranking with ID {ranking_id} does not exist.")
+    except Exception as e:
+        raise Exception(str(e))
+
+@sync_to_async  
+def getRanking(ranking_id):
+    try:
+        ranking = Ranking.objects.prefetch_related('rankings').get(id=ranking_id)
+        serializer = RankingPersonItemsSerializer(ranking)
+        data = serializer.data
+        return data
+    except Ranking.DoesNotExist:
+        raise Exception(f"Ranking with ID {ranking_id} does not exist.")
+    except Exception as e:
+        raise Exception(str(e))
+def getRankingSync(ranking_id):
+    try:
+        ranking = Ranking.objects.prefetch_related('rankings').get(id=ranking_id)
+        serializer = RankingPersonItemsSerializer(ranking)
+        data = serializer.data
+        return data
+    except Ranking.DoesNotExist:
+        raise Exception(f"Ranking with ID {ranking_id} does not exist.")
+    except Exception as e:
+        raise Exception(str(e))
+    
+def updateRanking(ranking_id):
+    print("update")
 class RankingViewSet(viewsets.ModelViewSet):
     queryset = Ranking.objects.prefetch_related('rankings').all()
     print(queryset)
@@ -118,6 +176,10 @@ class RankingViewSet(viewsets.ModelViewSet):
             ranking_item_serializer = RankingItemSerializer(data=ranking_item_data)
             if ranking_item_serializer.is_valid():
                 ranking_item_serializer.save()
+                # broad = await broadcast_ranking_update()
+                asyncio.run(broadcast_ranking_update())
+                # broadcast_ranking_updateSync()
+
                 return Response(ranking_item_serializer.data)
             else:
                 # If there's an error, delete the created Person
@@ -127,7 +189,7 @@ class RankingViewSet(viewsets.ModelViewSet):
         except Exception as e:
             person.delete()
             return Response({"error": str(e)}, status=500)
-
+    
 @authentication_classes([TokenAuthentication, JWTAuthentication])
 @permission_classes([IsAuthenticated])
 class ChallengeViewSet(viewsets.ModelViewSet):
@@ -230,7 +292,7 @@ def current_user_challenging(request):
     print("request")
     print(request.__dict__)
     user_ranking_items = RankingItem.objects.get(Person__user=request.user)
-    print("user_ranking_items")
+    print("user_ranking_intems")
     Challenges = Challenge.objects.filter(Challenger=user_ranking_items)
     
     # Challenges = Challenge.objects.filter(Challenger__person__user=user)
@@ -253,20 +315,77 @@ def current_user_challenges(request):
     return Response(serializer.data)
 
 
-async def handler(websocket):
-    while True:
-        try:
+COMMANDS = {
+    "getRanking": getRanking,
+    "updateRanking": updateRanking,
+}
+async def handler(websocket, path):
+    # Add the new client to the set of connected clients
+    connected_clients.add(websocket)
+    
+    try:
+        while True:
             message = await websocket.recv()
-        except websockets.ConnectionClosedOK:
-            print("closed")
-            break
-        print(message)
+            print(f"Received message from client: {message}")
 
+            # Process the message or perform any required actions
+            await process_message(websocket, message)
+
+            # Broadcast the ranking update to all connected clients
+            await broadcast_ranking_update()
+
+    except websockets.ConnectionClosedOK:
+        print("Client closed connection")
+    finally:
+        # Remove the client from the set when the connection is closed
+        connected_clients.remove(websocket)
 
 async def sock(HOST, PORT):
     async with websockets.serve(handler, HOST, PORT):
         await asyncio.Future()  # run forever
 
+async def process_message(websocket, message):
+    # Parse the received message
+    command, *args = message.split()
+
+    # Look up the corresponding function in COMMANDS
+    func = COMMANDS.get(command)
+
+    if func:
+        # Execute the function with the provided arguments
+        result = await func(*args)
+        result = json.dumps(result)
+        # Send the result back to the client
+        await websocket.send(result)
+        print(f"Sent response to client: {result}")
+    else:
+        # Handle unknown command
+        await websocket.send("Unknown command")
+
+async def broadcast_ranking_update():
+    # Get the updated ranking data
+    updated_ranking_data = await getRanking('4')
+
+    # Broadcast the update to all clients
+    for client in connected_clients:
+        try:
+            await client.send(json.dumps(updated_ranking_data))
+            print(f"Broadcasted ranking update to client: {client}")
+        except websockets.ConnectionClosedOK:
+            print(f"Failed to broadcast to closed connection: {client}")
+
+
+def broadcast_ranking_updateSync():
+    # Get the updated ranking data
+    updated_ranking_data = getRankingSync('4')
+
+    # Broadcast the update to all clients
+    for client in connected_clients:
+        try:
+            client.send(json.dumps(updated_ranking_data))
+            print(f"Broadcasted ranking update to client: {client}")
+        except websockets.ConnectionClosedOK:
+            print(f"Failed to broadcast to closed connection: {client}")
 # @api_view(['GET'])
 
 # def make_server_socket(request):

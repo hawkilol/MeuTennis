@@ -1,6 +1,9 @@
 "use client";
 import { useState } from 'react';
 import axios from 'axios';
+import { withRouter } from 'next/router';
+import { useRouter } from 'next/navigation';
+import CustomModal from './Modal';
 
 const storage = localStorage;
 const decodeJWT = (token) => {
@@ -26,7 +29,7 @@ const Login = () => {
 //  const [password, setPassword] = useState('');
 //  const [code, setCode] = useState('');
 //  const [rememberMe, setRememberMe] = useState(false);
-
+  const router = useRouter();
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [rememberMe, setRememberMe] = useState(false);
@@ -59,6 +62,9 @@ const Login = () => {
       // Navigate to the main screen or perform other actions
       // e.g., navigation.navigate('MainScreen');
       setSuccessModalVisible(true);
+
+      router.push('/')
+
     } catch (error) {
       console.log("123")
       // console.error('Login failed', error);
@@ -88,7 +94,7 @@ const Login = () => {
           <div className="rounded-md shadow-sm -space-y-px">
             <div>
               <label htmlFor="email-address" className="sr-only">
-                Email
+                Username
               </label>
               <input
                 id="email-address"
@@ -97,7 +103,7 @@ const Login = () => {
                 autoComplete="email"
                 required
                 className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
-                placeholder="Email"
+                placeholder="Username"
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
               />
@@ -130,6 +136,11 @@ const Login = () => {
           </div>
         </form>
       </div>
+      <CustomModal
+        isVisible={isSuccessModalVisible}
+        onClose={() => setSuccessModalVisible(false)}
+        modalText={`Logado com sucesso`}
+      />
     </div>
  );
 }

@@ -1,6 +1,8 @@
 "use client";
 
 import React, { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
+
 import { Icons } from "@/components/icons";
 import { useTheme } from "next-themes";
 import Login from "./Login";
@@ -9,9 +11,10 @@ import CustomModal from './Modal';
 const storage = localStorage;
 
 export default function LogInOut() {
+  const router = useRouter();
   const { theme, setTheme } = useTheme();
   const [isLoginModalVisible, setLoginModalVisible] = useState(false);
-
+  const [isLogoutSuccessModalVisible, setLogoutSuccessModalVisible] = useState(false);
   const handleLogout= async () => {
     try {
       console.log("logout!")
@@ -21,7 +24,11 @@ export default function LogInOut() {
       storage.removeItem('refresh_token');
  
       storage.removeItem('username');
-    //   updateUsername('');  
+      //   updateUsername('');  
+      setLogoutSuccessModalVisible(true);
+      router.push('/')
+      // alert('Logout!')
+
       
     } catch (error) {
       console.error('Logout failed', error);
@@ -68,10 +75,17 @@ export default function LogInOut() {
         onClose={() => setLoginModalVisible(false)}
         modalText={''}
       >
+       
         <div>
           <Login/>
         </div>
       </CustomModal>
+
+       <CustomModal
+        isVisible={isLogoutSuccessModalVisible}
+        onClose={() => setLogoutSuccessModalVisible(false)}
+        modalText={'Deslogado'}
+      ></CustomModal>
     </div>
   );
 }
