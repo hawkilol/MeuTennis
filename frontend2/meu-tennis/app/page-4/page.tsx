@@ -6,13 +6,13 @@ import Wrapper from "@/components/wrapper";
 import CustomModal from "@/components/Modal";
 import Login from '@/components/Login';
 import SocketClient from '@/components/SocketClient';
+import { TIMEOUT } from 'dns';
 
 const ApiTest = () => {
   const [isLoading, setLoading] = useState(true);
   const [rankingData, setRankingData] = useState(null);
   const [isChallengeSuccessModalVisible, setChallengeSuccessModalVisible] = useState(false);
   const [challengedName, setChallengedName] = useState(null);
-
   console.log(isChallengeSuccessModalVisible);
 
   const getRankingData = async () => {
@@ -61,14 +61,36 @@ const ApiTest = () => {
     getRankingData();
   };
 
+  const sendMessageSocket = (data) => {
+    const socketClient = new SocketClient(data);
+  
+    // socketClient.sendData(data);
+
+    // disconnectSocket(socketClient);
+  }
+
+  const disconnectSocket = (socketClient) => {
+    if (socketClient.isConnected) {
+      socketClient.close();
+    }
+  }
+
   useEffect(() => {
     getRankingData();
-    SocketClient.sendData('Hello, server!');
+    // const socketClient = new SocketClient();
+
+    // if (socketClient.isConnected) {
+    //   let data = "test data kkkk";
+    //   socketClient.send(data);
+    // } else {
+    //   console.warn('Not connected to the server.');
+    // }
+    // SocketClient.sendData('Hello, server!');
 
     // Close the connection when the component is unmounted
-    return () => {
-      SocketClient.closeConnection();
-    };
+    // return () => {
+    //   // SocketClient.closeConnection();
+    // };
   }, []);
 
   return (
@@ -106,8 +128,8 @@ const ApiTest = () => {
               </li>
             ))}
           </ul>
-          <button className= "bg-blue-500 text-white px-4 py-2 rounded-md" onClick={() => handleChallengePress(item)}>
-                  socket
+          <button className= "bg-blue-500 text-white px-4 py-2 rounded-md" onClick={() => sendMessageSocket("teste button")}>
+                  send message
           </button>
         </div>
         

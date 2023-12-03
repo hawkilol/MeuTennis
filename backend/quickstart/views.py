@@ -23,6 +23,9 @@ from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework.authentication import TokenAuthentication
 import socket
 import asyncio
+
+
+import websockets
 # import websockets
 class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
@@ -250,23 +253,44 @@ def current_user_challenges(request):
     return Response(serializer.data)
 
 
-@api_view(['GET'])
+async def handler(websocket):
+    while True:
+        try:
+            message = await websocket.recv()
+        except websockets.ConnectionClosedOK:
+            print("closed")
+            break
+        print(message)
 
+
+async def sock(HOST, PORT):
+    async with websockets.serve(handler, HOST, PORT):
+        await asyncio.Future()  # run forever
+
+# @api_view(['GET'])
+
+# def make_server_socket(request):
+#     HOST = '127.0.0.1'                 # Symbolic name meaning all available interfaces
+#     PORT = 50010
+#     print("Server is running on {}:{}".format(HOST, PORT))              # Arbitrary non-privileged port
+#     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+#         s.bind((HOST, PORT))
+#         s.listen(1)
+#         conn, addr = s.accept()
+#         with conn:
+#             print('Connected by', addr)
+#             while True:
+#                 data = conn.recv(1024)
+#                 print(data)
+#                 if not data: break
+#                 conn.sendall(data)
+#     return Response("oi",status=status.HTTP_200_OK)
+@api_view(['GET'])
 def make_server_socket(request):
     HOST = '127.0.0.1'                 # Symbolic name meaning all available interfaces
-    PORT = 50010
-    print("Server is running on {}:{}".format(HOST, PORT))              # Arbitrary non-privileged port
-    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-        s.bind((HOST, PORT))
-        s.listen(1)
-        conn, addr = s.accept()
-        with conn:
-            print('Connected by', addr)
-            while True:
-                data = conn.recv(1024)
-                print(data)
-                if not data: break
-                conn.sendall(data)
+    PORT = 50012
+    asyncio.run(sock(HOST, PORT))
+
     return Response("oi",status=status.HTTP_200_OK)
 
 class RankingItemCreateView(viewsets.ModelViewSet):
