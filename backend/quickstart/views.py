@@ -2,6 +2,7 @@ from django.contrib.auth.models import User, Group
 from rest_framework import viewsets, generics, permissions
 from rest_framework.decorators import action, api_view, permission_classes, authentication_classes
 from django.shortcuts import get_object_or_404
+from django.db.models import F
 
 from django.views.decorators.csrf import csrf_exempt
 
@@ -18,7 +19,7 @@ from django.urls import get_resolver
 
 from django.http import JsonResponse
 from quickstart.models import Ranking, RankingItem, Person, Challenge
-from quickstart.serializers import ChallengeStatusUpdateSerializer, RankingSerializer, RankingItemSerializer, PersonSerializer, RankingItemPersonSerializer, RankingPersonItemsSerializer, ChallengeSerializer, ChallengeNestedSerializer, ChallengedNestedSerializer
+from quickstart.serializers import ChallengeStatusUpdateSerializer, RankingSerializer, RankingItemSerializer, PersonSerializer, RankingItemPersonSerializer, RankingPersonItemsSerializer, ChallengeSerializer, ChallengeNestedSerializer, ChallengedNestedSerializer, RankingPersonItemsOrderedSerializer
 from rest_framework_simplejwt.tokens import RefreshToken, Token, UntypedToken
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework.authentication import TokenAuthentication
@@ -83,19 +84,31 @@ def getRankingSync(ranking_id):
     except Exception as e:
         raise Exception(str(e))
 
+
+
+
 @sync_to_async  
 def getRanking(arguments):
     try:
         args_list = arguments.split()
         ranking_id = int(args_list[0])
         ranking = Ranking.objects.prefetch_related('rankings').get(id=ranking_id)
-        serializer = RankingPersonItemsSerializer(ranking)
+        
+        ranking_items = ranking.rankings.all()
+
+        ordered_ranking_items =  ranking.rankings.all().order_by('-Result', 'Rank')
+
+        ranking.ordered_ranking_items = ordered_ranking_items
+
+        serializer = RankingPersonItemsOrderedSerializer(ranking)
         data = serializer.data
+
         return data
     except Ranking.DoesNotExist:
         raise Exception(f"Ranking with ID {ranking_id} does not exist.")
     except Exception as e:
         raise Exception(str(e))
+
 
     
 def updateRanking(ranking_id):

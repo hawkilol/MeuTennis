@@ -94,12 +94,12 @@ const ApiTest = () => {
                       key={item.id}
                       className={`bg-${index % 2 === 0 ? 'gray-300' : 'white'} border-b border-gray-400 p-3 flex items-center`}
                     >
-                      <span className="mr-3 font-bold">{item.Rank}</span>
+                      {/* <span className="mr-3 font-bold">{item.Rank}</span> */}
                       <span className="flex-1 text-gray-700">
                         {item.Person.StandardGivenName} {item.Person.StandardFamilyName}
                       </span>
-                      <span className="text-gray-600">{item.Type}</span>
-                      <span className="text-gray-600 ml-auto">Result: {item.Result}</span>
+                      {/* <span className="text-gray-600">{item.Type}</span> */}
+                      <span className="text-gray-600 ml-auto mr-5">Result: {item.Result}</span>
                       {item.Person.user.username !== username && (
                       <button
                         className="bg-blue-500 text-white px-4 py-2 rounded-md"

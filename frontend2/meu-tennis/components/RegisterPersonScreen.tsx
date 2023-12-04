@@ -26,7 +26,7 @@ const RegisterPersonScreen = () => {
         Updated: currentDate,
         Type: 'Person',
         SortOrder: 1,
-        Result: 100,
+        Result: 0,
         Rank: 1,
         RankingItemsCode: 1,
         Person: {

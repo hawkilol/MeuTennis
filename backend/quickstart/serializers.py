@@ -130,6 +130,57 @@ class RankingPersonItemsSerializer(serializers.ModelSerializer):
         model = Ranking
         fields = '__all__'
 
+
+class RankingPersonItemsSerializer(serializers.ModelSerializer):
+    RankingItems = RankingItemPersonSerializer(many=True, read_only=True, source='rankings')
+   
+    class Meta:
+        model = Ranking
+        fields = '__all__'
+
+class RankingItemOrderedSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = RankingItem
+        fields = '__all__'
+
+
+
+# class RankingPersonItemsSerializer(serializers.ModelSerializer):
+#     RankingItems = RankingItemPersonSerializer(many=True, read_only=True, source='rankings')
+#     class Meta:
+#         model = Ranking
+#         fields = '__all__'
+
+
+# class RankingItemPersonSerializer(serializers.ModelSerializer):
+#     Person = PersonSerializer()
+#     Challenging = ChallengeSerializer(many=True, read_only=True, source='challenges_as_challenger')
+#     BeingChallenged = ChallengeSerializer(many=True, read_only=True, source='challenges_as_challenged')
+#     class Meta:
+#         model = RankingItem
+#         fields = '__all__'
+            
+class RankingPersonItemsOrderedSerializer(serializers.ModelSerializer):
+    RankingItems = RankingItemPersonSerializer(many=True, read_only=True, source='ordered_ranking_items')
+
+    class Meta:
+        model = Ranking
+        fields = '__all__'
+
+# class RankingPersonItemsOrderedSerializer(serializers.ModelSerializer):
+#     ordered_ranking_items = serializers.SerializerMethodField()
+
+#     class Meta:
+#         model = Ranking
+#         fieldRankingPersonItemsOrderedSerializers = ['id', 'Updated', 'RankingID', 'Name', 'RankingType', 'Gender', 'ordered_ranking_items']
+
+#     def get_ordered_ranking_items(self, obj):
+#         # Order the RankingItems by the Result field
+#         ranking_items = obj.rankings.all().order_by('-Result', 'Rank')
+#         serializer = RankingItemSerializer(ranking_items, many=True)
+#         return serializer.data
+
+
 class ChallengeNestedSerializer(serializers.ModelSerializer):
     Challenger = RankingItemPersonSerializer(read_only=True)
     Challenged = RankingItemPersonSerializer(read_only=True)
