@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import Wrapper from '@/components/wrapper';
+import SocketClient from '@/components/SocketClient';
 
 const ChallengesScreen = () => {
   const [challenges, setChallenges] = useState([]);
@@ -10,6 +11,22 @@ const ChallengesScreen = () => {
   const [isLoading, setLoading] = useState(true);
   const localUsername = 'Your Local Username Here';
 
+
+  const sendMessageSocket = async (data) => {
+    // Create a SocketClient instance with the message data
+    const socketClient = new SocketClient(data);
+
+    // Attach a listener to handle messages received from the server
+    socketClient.client.addEventListener('message', async (event) => {
+
+      const receivedData = await JSON.parse(event.data);
+      console.log('Received data from server:', receivedData);
+
+      // Assuming the server sends an updated ranking in the message
+      // setRankingData(receivedData);
+      // console.log(rankingData)
+    });
+  };
   const fetchUserChallenges = async () => {
     try {
       const token = localStorage.getItem('access_token');
@@ -56,17 +73,9 @@ const ChallengesScreen = () => {
 
   const handleCancelChallenge = async (challengeId) => {
     try {
-      const token = localStorage.getItem('access_token');
-      await axios.put(
-        `http://localhost:8000/cancel_challenge/${challengeId}/`,
-        {},
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-      handleRefresh(); // Refresh the challenges after canceling
+      console.log(challengeId)
+      sendMessageSocket("changeChallengeStatus " +challengeId+ " Cancelado")
+      handleRefresh(); 
     } catch (error) {
       console.error('Error canceling challenge:', error);
     }
@@ -74,38 +83,16 @@ const ChallengesScreen = () => {
 
   const handleAcceptChallenge = async (challengeId) => {
     try {
-      const token = localStorage.getItem('access_token');
-      await axios.put(
-        `http://localhost:8000/accept_challenge/${challengeId}/`,
-        {},
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-      handleRefresh(); // Refresh the challenges after accepting
+      console.log(challengeId)
+      sendMessageSocket("changeChallengeStatus " +challengeId+ " Aceito")
+      handleRefresh(); 
     } catch (error) {
-      console.error('Error accepting challenge:', error);
+      console.error('Error canceling challenge:', error);
     }
   };
 
   const handleDeclineChallenge = async (challengeId) => {
-    try {
-      const token = localStorage.getItem('access_token');
-      await axios.put(
-        `http://localhost:8000/decline_challenge/${challengeId}/`,
-        {},
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-      handleRefresh(); // Refresh the challenges after declining
-    } catch (error) {
-      console.error('Error declining challenge:', error);
-    }
+    handleCancelChallenge(challengeId)
   };
 
   useEffect(() => {
@@ -133,8 +120,12 @@ const ChallengesScreen = () => {
                 <p>Loading...</p>
               ) : (
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {challenges.map((challenge) => (
+                  {challenges
+                  .filter((challenge) => challenge.Status !== 'Cancelado') // Exclude challenges with status 'Cancelado'
+                  .map((challenge) => (
+                    
                     <div
+
                       key={challenge.id}
                       className={`bg-white p-4 rounded-md shadow-md ${
                         localUsername ===
@@ -153,6 +144,7 @@ const ChallengesScreen = () => {
 
                       <p className="text-lg font-semibold mb-2">Status:</p>
                       <p>{challenge.Status}</p>
+
                       {challenge.Status == 'Pendente' && (
                           <button
                             className="bg-red-500 text-white px-4 py-2 rounded-md mt-2"
@@ -163,7 +155,9 @@ const ChallengesScreen = () => {
                             Cancelar Desafio
                           </button>
                         )}
+                    
                     </div>
+                    
                   ))}
                 </div>
               )}
@@ -175,7 +169,9 @@ const ChallengesScreen = () => {
                 <p>Loading...</p>
               ) : (
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {gettingChallenged.map((challenge) => (
+                  {gettingChallenged
+                  .filter((challenge) => challenge.Status !== 'Cancelado') // Exclude challenges with status 'Cancelado'
+                  .map((challenge) => (
                     <div
                       key={challenge.id}
                       className={`bg-white p-4 rounded-md shadow-md ${
@@ -185,11 +181,11 @@ const ChallengesScreen = () => {
                           : 'border-2 border-blue-500' // Styling for challenged
                       }`}
                     >
-                      <p className="text-lg font-semibold mb-2">Challenger:</p>
+                      <p className="text-lg font-semibold mb-2">Desafiante:</p>
                       <p>{challenge.Challenger.Person.user.username}</p>
                       <p>{challenge.Challenger.Person.TennisId}</p>
 
-                      <p className="text-lg font-semibold mb-2">Challenged:</p>
+                      <p className="text-lg font-semibold mb-2">Desafiado:</p>
                       <p>{challenge.Challenged.Person.user.username}</p>
                       <p>{challenge.Challenged.Person.TennisId}</p>
 

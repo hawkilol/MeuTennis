@@ -62,6 +62,29 @@ class ChallengeSerializer(serializers.ModelSerializer):
         model = Challenge
         fields = ['Challenger', 'Challenged']
 
+class ChallengeStatusSerializer(serializers.ModelSerializer):
+    Challenger = serializers.PrimaryKeyRelatedField(queryset=RankingItem.objects.all())
+    Challenged = serializers.PrimaryKeyRelatedField(queryset=RankingItem.objects.all())
+    class Meta:
+        model = Challenge
+        fields = ['Challenger', 'Challenged', 'Status']
+    
+# class ChallengeStatusUpdateSerializer(serializers.ModelSerializer):
+#     class Meta:
+#         model = Challenge
+#         fields = ['Status']
+
+#     def update_challenge_status(self, instance, validated_data):
+#         print(validated_data.__dict__)
+#         data = validated_data.pop('data')
+#         print(data)
+#         instance.Status = validated_data.pop('data')
+#         instance.save()
+#         return instance
+class ChallengeStatusUpdateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Challenge
+        fields = ['Status']
 class RankingItemPersonSerializer(serializers.ModelSerializer):
     Person = PersonSerializer()
     Challenging = ChallengeSerializer(many=True, read_only=True, source='challenges_as_challenger')
@@ -113,7 +136,7 @@ class ChallengeNestedSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Challenge
-        fields = ['Challenger', 'Challenged', 'Status', 'Message']
+        fields = ['id', 'Challenger', 'Challenged', 'Status', 'Message']
 
 class ChallengedNestedSerializer(serializers.ModelSerializer):
     Challenger = RankingItemNestedPersonSerializer(read_only=True)

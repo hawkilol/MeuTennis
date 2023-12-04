@@ -1,6 +1,7 @@
 from django.contrib.auth.models import User, Group
 from rest_framework import viewsets, generics, permissions
 from rest_framework.decorators import action, api_view, permission_classes, authentication_classes
+from django.shortcuts import get_object_or_404
 
 from django.views.decorators.csrf import csrf_exempt
 
@@ -17,7 +18,7 @@ from django.urls import get_resolver
 
 from django.http import JsonResponse
 from quickstart.models import Ranking, RankingItem, Person, Challenge
-from quickstart.serializers import RankingSerializer, RankingItemSerializer, PersonSerializer, RankingItemPersonSerializer, RankingPersonItemsSerializer, ChallengeSerializer, ChallengeNestedSerializer, ChallengedNestedSerializer
+from quickstart.serializers import ChallengeStatusUpdateSerializer, RankingSerializer, RankingItemSerializer, PersonSerializer, RankingItemPersonSerializer, RankingPersonItemsSerializer, ChallengeSerializer, ChallengeNestedSerializer, ChallengedNestedSerializer
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework.authentication import TokenAuthentication
@@ -81,8 +82,10 @@ def getRankingSync(ranking_id):
         raise Exception(str(e))
 
 @sync_to_async  
-def getRanking(ranking_id):
+def getRanking(arguments):
     try:
+        args_list = arguments.split()
+        ranking_id = int(args_list[0])
         ranking = Ranking.objects.prefetch_related('rankings').get(id=ranking_id)
         serializer = RankingPersonItemsSerializer(ranking)
         data = serializer.data
@@ -91,16 +94,7 @@ def getRanking(ranking_id):
         raise Exception(f"Ranking with ID {ranking_id} does not exist.")
     except Exception as e:
         raise Exception(str(e))
-def getRankingSync(ranking_id):
-    try:
-        ranking = Ranking.objects.prefetch_related('rankings').get(id=ranking_id)
-        serializer = RankingPersonItemsSerializer(ranking)
-        data = serializer.data
-        return data
-    except Ranking.DoesNotExist:
-        raise Exception(f"Ranking with ID {ranking_id} does not exist.")
-    except Exception as e:
-        raise Exception(str(e))
+
     
 def updateRanking(ranking_id):
     print("update")
@@ -315,9 +309,42 @@ def current_user_challenges(request):
     return Response(serializer.data)
 
 
+def getRankingSync(ranking_id):
+    try:
+        ranking = Ranking.objects.prefetch_related('rankings').get(id=ranking_id)
+        serializer = RankingPersonItemsSerializer(ranking)
+        data = serializer.data
+        return data
+    except Ranking.DoesNotExist:
+        raise Exception(f"Ranking with ID {ranking_id} does not exist.")
+    except Exception as e:
+        raise Exception(str(e))
+    
+@sync_to_async  
+def changeChallengeStatus(challenge_id, status):
+    try:
+        print(challenge_id, status)
+    
+        challenge = get_object_or_404(Challenge, id=challenge_id)
+        data = {
+            'Status': status  # Use 'Status' instead of 'status' to match the serializer field
+        }
+        
+        serializer = ChallengeStatusUpdateSerializer(challenge, data=data)
+        
+        if serializer.is_valid():
+            serializer.save()
+            return "OK"
+        else:
+            print(serializer.errors)
+    except Challenge.DoesNotExist:
+        print("Challenge not found.")
+    
+
 COMMANDS = {
     "getRanking": getRanking,
     "updateRanking": updateRanking,
+    "changeChallengeStatus": changeChallengeStatus,
 }
 async def handler(websocket, path):
     # Add the new client to the set of connected clients
