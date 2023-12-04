@@ -94,8 +94,6 @@ def getRanking(arguments):
         ranking_id = int(args_list[0])
         ranking = Ranking.objects.prefetch_related('rankings').get(id=ranking_id)
         
-        ranking_items = ranking.rankings.all()
-
         ordered_ranking_items =  ranking.rankings.all().order_by('-Result', 'Rank')
 
         ranking.ordered_ranking_items = ordered_ranking_items
