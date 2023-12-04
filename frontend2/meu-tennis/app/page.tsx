@@ -25,7 +25,7 @@ export default function Home() {
               MeuTennis™
             </span>
             <p className="pb-6 font-medium">
-              Bla bla bla
+              É preciso ter um cadastro para utilizar o MeuTennis
             </p>
 
             <div className="">

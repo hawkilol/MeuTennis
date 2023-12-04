@@ -11,8 +11,8 @@ const SECTION_DATA = [
   { label: 1, href: "/", isFirst: true, isLast: false },
   { label: 2, href: "/page-2", isFirst: true, isLast: false },
   { label: 3, href: "/page-3", isFirst: false, isLast: false },
-  { label: 4, href: "/page-4", isFirst: false, isLast: false },
-  { label: 5, href: "/page-5", isFirst: false, isLast: true },
+  // { label: 4, href: "/page-4", isFirst: false, isLast: false },
+  // { label: 5, href: "/page-5", isFirst: false, isLast: true },
   
 ];
 let username = localStorage.getItem('username')
@@ -64,7 +64,7 @@ export default function Wrapper({ children }: { children: React.ReactNode }) {
             disabled
             className="text-sm font-bold rounded-3xl bg-[#e0dede] text-black dark:bg-zinc-800 dark:text-zinc-400 px-7 py-2 opacity-50 hover:bg-[#d1d0d0] dark:hover:bg-zinc-900"
           >
-            <span className="">Back</span>
+            <span className="">Voltar</span>
           </Button>
         </Link>
         <div className={`text-xs font-bold py-2  group-hover:bg-[#e1ffe1c5]`}>
@@ -83,7 +83,7 @@ export default function Wrapper({ children }: { children: React.ReactNode }) {
           <Button
             className={`text-sm font-bold rounded-3xl bg-zinc-900 text-white dark:bg-white px-7 py-2 dark:text-black`}
           >
-            <span className="">Next</span>
+            <span className="">Próximo</span>
           </Button>
         </Link>
       </div>

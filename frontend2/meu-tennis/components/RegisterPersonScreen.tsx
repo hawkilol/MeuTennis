@@ -5,6 +5,8 @@ import axios from 'axios';
 import { useRouter } from 'next/navigation';
 import CustomModal from './Modal';
 
+
+
 const RegisterPersonScreen = () => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');

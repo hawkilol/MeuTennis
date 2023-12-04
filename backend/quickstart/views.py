@@ -19,7 +19,7 @@ from django.urls import get_resolver
 from django.http import JsonResponse
 from quickstart.models import Ranking, RankingItem, Person, Challenge
 from quickstart.serializers import ChallengeStatusUpdateSerializer, RankingSerializer, RankingItemSerializer, PersonSerializer, RankingItemPersonSerializer, RankingPersonItemsSerializer, ChallengeSerializer, ChallengeNestedSerializer, ChallengedNestedSerializer
-from rest_framework_simplejwt.tokens import RefreshToken
+from rest_framework_simplejwt.tokens import RefreshToken, Token, UntypedToken
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework.authentication import TokenAuthentication
 import socket
@@ -27,6 +27,7 @@ import asyncio
 import json
 from asgiref.sync import sync_to_async  # Import sync_to_async
 from channels.layers import get_channel_layer
+from django.contrib.auth.models import AnonymousUser
 
 import websockets
 
@@ -34,6 +35,7 @@ import websockets
 
 
 connected_clients = set()
+connected_clients_dict = {}
 
 # import websockets
 class UserViewSet(viewsets.ModelViewSet):
@@ -339,27 +341,66 @@ def changeChallengeStatus(challenge_id, status):
             print(serializer.errors)
     except Challenge.DoesNotExist:
         print("Challenge not found.")
+
+# @sync_to_async
+def get_user_from_token(token_string):
+    try:
+        token = UntypedToken(token_string)
+        user_id = token.payload["user_id"]
+        user = User.objects.get(pk=user_id)
+        return user
+    except Exception as e:
+        print(f"Error decoding token: {e}")
+        return AnonymousUser()
+ 
+@sync_to_async  
+def getChallenging(token):
+    print("challenging")
+    user = get_user_from_token(token)
+    print(user)
+    user_ranking_items = RankingItem.objects.get(Person__user=user)
+    print("user_ranking_intems")
+    Challenges = Challenge.objects.filter(Challenger=user_ranking_items)
     
+    serializer = ChallengeNestedSerializer(Challenges, many=True)
+    return serializer.data
+
+@sync_to_async  
+def getChallenges(token):
+    print("challenges")
+    user = get_user_from_token(token)
+    print(user)
+    user_ranking_items = RankingItem.objects.get(Person__user=user)
+    print("user_ranking_items")
+    Challenges = Challenge.objects.filter(Challenged=user_ranking_items)
+    
+    # Challenges = Challenge.objects.filter(Challenger__person__user=user)
+    serializer = ChallengeNestedSerializer(Challenges, many=True)
+    # Broadcast the ranking update to all connected clients
+    return serializer.data
+
 
 COMMANDS = {
     "getRanking": getRanking,
     "updateRanking": updateRanking,
     "changeChallengeStatus": changeChallengeStatus,
+    "getChallenging": getChallenging,
+    "getChallenges": getChallenges,
+
 }
 async def handler(websocket, path):
     # Add the new client to the set of connected clients
-    connected_clients.add(websocket)
+    print("path!")
+    print(path)
+    # connected_clients.add(websocket)
     
     try:
         while True:
             message = await websocket.recv()
             print(f"Received message from client: {message}")
 
-            # Process the message or perform any required actions
+            # RPC (Remote Procedure Call)
             await process_message(websocket, message)
-
-            # Broadcast the ranking update to all connected clients
-            await broadcast_ranking_update()
 
     except websockets.ConnectionClosedOK:
         print("Client closed connection")
@@ -400,6 +441,18 @@ async def broadcast_ranking_update():
             print(f"Broadcasted ranking update to client: {client}")
         except websockets.ConnectionClosedOK:
             print(f"Failed to broadcast to closed connection: {client}")
+
+# async def broadcast_challenge_update():
+#     # Get the updated ranking data
+#     updated_ranking_data = await getRanking('4')
+
+#     # Broadcast the update to all clients
+#     for client in connected_clients:
+#         try:
+#             await client.send(json.dumps(updated_ranking_data))
+#             print(f"Broadcasted challenge update to client: {client}")
+#         except websockets.ConnectionClosedOK:
+#             print(f"Failed to broadcast to closed connection: {client}")
 
 
 def broadcast_ranking_updateSync():
