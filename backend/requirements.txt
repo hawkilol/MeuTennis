@@ -3,5 +3,6 @@ djangorestframework
 djangorestframework-simplejwt
 django-cors-headers
 websockets
-django-admin
 channels
+
+django-admin
