@@ -122,6 +122,12 @@ function HomeScreen({ navigation, prop }) {
                         from: 'fromHome!'
                     })}
                 />
+                <Button
+                    title="Connect Socket Client"
+                    onPress={() => navigation.navigate('SocketClient', {
+                        from: 'fromHome!'
+                    })}
+                />
                 <Logout>
 
                 </Logout>

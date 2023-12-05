@@ -1,5 +1,10 @@
 {
   "dependencies": {
-    "@baronha/ting": "^1.1.0"
+    "@baronha/ting": "^1.1.0",
+    "react-native-tcp-socket": "^6.0.6"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.23.5",
+    "@babel/plugin-transform-modules-commonjs": "^7.23.3"
   }
 }

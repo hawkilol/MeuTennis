@@ -1,5 +1,8 @@
 django
-django-admin
 djangorestframework
 djangorestframework-simplejwt
 django-cors-headers
+websockets
+channels
+
+django-admin
