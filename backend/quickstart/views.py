@@ -361,26 +361,10 @@ async def broadcast_ranking_update():
 # asyncio.run(broadcast_challenge(user_id, data))
 
 async def broadcast_challenge_to_user(user_id):
-    print()
 
     print("broadcast challenge")
-    print(user_id)
     challenges  = await getChallengesFromUser(user_id)
-    print("challenges")
-    print(challenges)
-
-    websocket = connected_clients_dict.get(str(user_id))
-    print("connecte clients")
-    print(connected_clients_dict)
-    print("websock")
-    print(websocket)
-    if websocket:
-
-        message = json.dumps(challenges)
-        await websocket.send(message)
-        print(f"Broadcasted challenge to user {user_id}")
-    else:
-        print(f"Error to broadcast to {user_id}")
+    await broadcast_data_to_user(challenges, user_id)
 
 
 async def broadcast_data_to_user(data, user_id):
