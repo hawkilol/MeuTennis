@@ -66,8 +66,7 @@ def getRanking(arguments):
 
 
     
-def updateRanking(ranking_id):
-    print("update")
+
 class RankingViewSet(viewsets.ModelViewSet):
     queryset = Ranking.objects.prefetch_related('rankings').all()
     print(queryset)
@@ -138,8 +137,7 @@ class RankingViewSet(viewsets.ModelViewSet):
             ranking_item_serializer = RankingItemSerializer(data=ranking_item_data)
             if ranking_item_serializer.is_valid():
                 ranking_item_serializer.save()
-                asyncio.run(broadcast_ranking_update())
-
+                asyncio.run(broadcast_ranking_update()) 
                 return Response(ranking_item_serializer.data)
             else:
                 # Deleta a pessoa caso ocorra um erro
@@ -205,6 +203,9 @@ class RankingItemViewSet(viewsets.ModelViewSet):
             serializer = ChallengeSerializer(data=challenge_data)
             if serializer.is_valid():
                 serializer.save()
+                # atualiza os desafios do desafiado
+                asyncio.run(broadcast_challenge_to_user(request.data.get('Challenged_user_id')))
+                # asyncio.run(broadcast_data_to_user(data, request.user.id))
                 return Response(serializer.data, status=201)
             return Response(serializer.errors, status=400)
         except RankingItem.DoesNotExist:
@@ -284,16 +285,34 @@ def getChallenges(token):
     serializer = ChallengeNestedSerializer(Challenges, many=True)
     return serializer.data
 
+@sync_to_async  
+def getChallengesFromUser(user):
+    user_ranking_items = RankingItem.objects.get(Person__user=user)
+    Challenges = Challenge.objects.filter(Challenged=user_ranking_items)
+    serializer = ChallengeNestedSerializer(Challenges, many=True)
+    return serializer.data
+
+#broken
+@sync_to_async  
+def getChallengesFromId(user_id):
+    user_ranking_items = RankingItem.objects.get(Person__user=user_id)
+    Challenges = Challenge.objects.filter(Challenged=user_ranking_items)
+    serializer = ChallengeNestedSerializer(Challenges, many=True)
+    return serializer.data
+
 
 COMMANDS = {
     "getRanking": getRanking,
-    "updateRanking": updateRanking,
     "changeChallengeStatus": changeChallengeStatus,
     "getChallenging": getChallenging,
     "getChallenges": getChallenges,
 
 }
 async def handler(websocket, path):
+    user_id = path[1:]
+    print("userid request from path: ", user_id)
+    if(user_id): connected_clients_dict[user_id] = websocket
+
     connected_clients.add(websocket)
     
     try:
@@ -305,6 +324,7 @@ async def handler(websocket, path):
     except websockets.ConnectionClosedOK:
         print("Client closed connection")
     finally:
+        if(user_id) in connected_clients_dict: del connected_clients_dict[user_id]
         connected_clients.remove(websocket)
 
 async def sock(HOST, PORT):
@@ -337,6 +357,40 @@ async def broadcast_ranking_update():
             print(f"Broadcasted ranking update to client: {client}")
         except websockets.ConnectionClosedOK:
             print(f"Failed to broadcast to closed connection: {client}")
+
+# asyncio.run(broadcast_challenge(user_id, data))
+
+async def broadcast_challenge_to_user(user_id):
+    print()
+
+    print("broadcast challenge")
+    print(user_id)
+    challenges  = await getChallengesFromUser(user_id)
+    print("challenges")
+    print(challenges)
+
+    websocket = connected_clients_dict.get(str(user_id))
+    print("connecte clients")
+    print(connected_clients_dict)
+    print("websock")
+    print(websocket)
+    if websocket:
+
+        message = json.dumps(challenges)
+        await websocket.send(message)
+        print(f"Broadcasted challenge to user {user_id}")
+    else:
+        print(f"Error to broadcast to {user_id}")
+
+
+async def broadcast_data_to_user(data, user_id):
+    websocket = connected_clients_dict.get(str(user_id))
+    if websocket:
+        message = json.dumps(data)
+        await websocket.send(message)
+        print(f"Broadcasted update to user {user_id}")
+    else:
+        print(f"Error to broadcast to {user_id}")
 
 
 @api_view(['GET'])

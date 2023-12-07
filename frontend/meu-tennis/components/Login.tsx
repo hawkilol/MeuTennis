@@ -58,8 +58,9 @@ const Login = () => {
       const decodedJWT = decodeJWT(access_token);
       console.log(decodedJWT)
       storage.setItem('username', decodedJWT.username);
+      storage.setItem('userid', decodedJWT.user_id);
+
     //   updateUsername(decodedJWT.username)
-      // Navigate to the main screen or perform other actions
       // e.g., navigation.navigate('MainScreen');
       setSuccessModalVisible(true);
 
