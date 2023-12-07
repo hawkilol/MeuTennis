@@ -16,15 +16,7 @@ const ApiTest = () => {
   const [isChallengeSuccessModalVisible, setChallengeSuccessModalVisible] = useState(false);
   const [challengedName, setChallengedName] = useState(null);
 
-  const getRankingData = async () => {
-    try {
 
-    } catch (error) {
-      console.error(error);
-    } finally {
-      setLoading(false);
-    }
-  };
   // Trocar pra SRPC
   const startChallenge = async (rankingItemId, Challenged_user_id, challengedName) => {
     try {
@@ -73,7 +65,7 @@ const ApiTest = () => {
 
   useEffect(() => {
     sendMessageSocket("getRanking 4");
-    getRankingData();
+    setLoading(false);
   }, []);
 
   return (

@@ -11,16 +11,6 @@ const ChallengesScreen = () => {
   const [isLoading, setLoading] = useState(true);
   const localUsername = 'Your Local Username Here';
 
-
-  const getRankingData = async () => {
-    try {
-
-    } catch (error) {
-      console.error(error);
-    } finally {
-      setLoading(false);
-    }
-  };
   const sendMessageSocket = async (data) => {
     const socketClient = new SocketClient(data);
 
@@ -65,7 +55,8 @@ const ChallengesScreen = () => {
 
     fetchUserChallenges();
     fetchUserGettingChallenged();
-    getRankingData();
+    setLoading(false);
+
 
   };
 
@@ -97,7 +88,8 @@ const ChallengesScreen = () => {
     // setLoading(true);
     fetchUserChallenges();
     fetchUserGettingChallenged();
-    getRankingData();
+    setLoading(false);
+
 
   }, []);
   return (

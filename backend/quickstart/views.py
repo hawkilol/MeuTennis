@@ -310,7 +310,7 @@ COMMANDS = {
 }
 async def handler(websocket, path):
     user_id = path[1:]
-    print("userid request from path: ", user_id)
+    print("userid connection from path: ", user_id)
     if(user_id): connected_clients_dict[user_id] = websocket
 
     connected_clients.add(websocket)
