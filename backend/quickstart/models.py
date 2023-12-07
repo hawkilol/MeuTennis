@@ -1,8 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import User
 
-# Create your models here.
-
 class Ranking(models.Model):
     Updated = models.DateTimeField
     RankingID = models.CharField(max_length=255)
@@ -48,33 +46,5 @@ class Challenge(models.Model):
     Message = models.CharField(max_length=255, default='Mensagem de desafi')
     Score = models.CharField(max_length=255, default="0-0 0-0")
 
-
 # python manage.py makemigrations
 # python manage.py migrate
-
-# your_app_name/admin.py
-# from django.contrib import admin
-# from .models import Book
-
-# admin.site.register(Book)
-# {
-#     "Updated": "2023-01-01",
-#     "Type": "Barrel Roll",
-#     "SortOrder": 1,
-#     "Result": 500,
-#     "Rank": 1,
-#     "RankingItemsCode": "1",
-#     "Person": {
-
-#     "Updated": "2023-01-01",
-#     "TennisId": "personTennisid",
-#     "StandardGivenName": "kalil",
-#     "StandardFamilyName": "Person1",
-#     "user": {
-#         "username": "kalilPerson3",
-#         "password": "kalilPerson3",
-#         "email": "kalilPerson1@gmail.com"
-#     }
-# }
-      
-# }

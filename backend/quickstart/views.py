@@ -3,11 +3,8 @@ from rest_framework import viewsets, generics, permissions
 from rest_framework.decorators import action, api_view, permission_classes, authentication_classes
 from django.shortcuts import get_object_or_404
 from django.db.models import F
-
 from django.views.decorators.csrf import csrf_exempt
-
 from quickstart.serializers import UserSerializer, GroupSerializer
-# from quickstart.serializers import UserSerializer, GroupSerializer, YourModelSerializer
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.views import APIView
@@ -15,7 +12,6 @@ from rest_framework.permissions import AllowAny, IsAuthenticated
 from django.contrib.auth import authenticate, login
 from django.http import Http404, JsonResponse, HttpResponse
 from django.urls import get_resolver
-
 
 from django.http import JsonResponse
 from quickstart.models import Ranking, RankingItem, Person, Challenge
@@ -31,62 +27,23 @@ from channels.layers import get_channel_layer
 from django.contrib.auth.models import AnonymousUser
 
 import websockets
-
-
-
+from threading import Thread
 
 connected_clients = set()
 connected_clients_dict = {}
 
-# import websockets
 class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
     serializer_class = UserSerializer 
 
 class GroupViewSet(viewsets.ModelViewSet):
     queryset = Group.objects.all()
-    serializer_class = GroupSerializer  # Replace with your actual Group serializer
-
-# class YourModelListView(viewsets.ModelViewSet):
-#     queryset = YourModel.objects.all()
-#     serializer_class = YourModelSerializer  # Replace with your actual Model serializer
-# class TestList(viewsets.ModelViewSet):
-#     queryset = Test.objects.all()
-#     serializer_class = TestSerializer  # Replace with your actual Test serializer
+    serializer_class = GroupSerializer  
 
 class RankingPersonInsideViewSet(viewsets.ModelViewSet):
     queryset = Ranking.objects.prefetch_related('rankings').all()
     serializer_class = RankingPersonItemsSerializer
     
-class getRankingJson():
-    # queryset = Ranking.objects.prefetch_related('rankings').all()
-    # serializer_class = RankingPersonItemsSerializer
-    def getRanking(ranking_id):
-        try:
-            ranking = Ranking.objects.prefetch_related('rankings').get(id=ranking_id)
-            serializer = RankingPersonItemsSerializer(ranking)
-            data = serializer.data
-            return JsonResponse(data)
-        except Ranking.DoesNotExist:
-            return JsonResponse({"error": f"Ranking with ID {ranking_id} does not exist."}, status=404)
-        except Exception as e:
-            return JsonResponse({"error": str(e)}, status=500)
-
-
-def getRankingSync(ranking_id):
-    try:
-        ranking = Ranking.objects.prefetch_related('rankings').get(id=ranking_id)
-        serializer = RankingPersonItemsSerializer(ranking)
-        data = serializer.data
-        return data
-    except Ranking.DoesNotExist:
-        raise Exception(f"Ranking with ID {ranking_id} does not exist.")
-    except Exception as e:
-        raise Exception(str(e))
-
-
-
-
 @sync_to_async  
 def getRanking(arguments):
     try:
@@ -162,14 +119,12 @@ class RankingViewSet(viewsets.ModelViewSet):
     def add_create_person_to_ranking(self, request, pk=None):
         ranking = self.get_object()
         
-        # Create a new Person
         person_serializer = PersonSerializer(data=request.data.get('Person'))
         if person_serializer.is_valid():
             person = person_serializer.save()
         else:
             return Response(person_serializer.errors, status=400)
         try:
-        # Create a new RankingItem with the created Person
             ranking_item_data = {
                 'Type': request.data.get('Type'),
                 'SortOrder': request.data.get('SortOrder'),
@@ -183,13 +138,11 @@ class RankingViewSet(viewsets.ModelViewSet):
             ranking_item_serializer = RankingItemSerializer(data=ranking_item_data)
             if ranking_item_serializer.is_valid():
                 ranking_item_serializer.save()
-                # broad = await broadcast_ranking_update()
                 asyncio.run(broadcast_ranking_update())
-                # broadcast_ranking_updateSync()
 
                 return Response(ranking_item_serializer.data)
             else:
-                # If there's an error, delete the created Person
+                # Deleta a pessoa caso ocorra um erro
                 person.delete()
                 return Response(ranking_item_serializer.errors, status=400)
         
@@ -211,7 +164,6 @@ class ChallengeNestedViewSet(viewsets.ModelViewSet):
     serializer_class = ChallengeNestedSerializer
 
 def list(self, request):
-    # Use the prefetched ranking items in the serializer
     serializer = self.get_serializer(self.get_queryset(), many=True)
     print(serializer.data)
     return Response(serializer.data)
@@ -232,7 +184,6 @@ class RankingItemViewSet(viewsets.ModelViewSet):
         challengers = ranking_item.challenges_as_challenged.all()
         print("challengers")
         print(challengers)
-        # serializer = ChallengeNestedSerializer(challengers, many=True)
         serializer = ChallengedNestedSerializer(challengers, many=True)
 
         return Response(serializer.data)
@@ -240,19 +191,15 @@ class RankingItemViewSet(viewsets.ModelViewSet):
     @action(detail=False, methods=['post'])
     def register_challenge(self, request):
         try:
-            # Get the RankingItem associated with the current user
             print(request)
             print(request.data)
             print(request.user)
             ranking_item = RankingItem.objects.get(Person__user=request.user)
 
-
             print(request.data.get('Challenged'))
-            # Create a new challenge
             challenge_data = {
                 'Challenger':  ranking_item.id,
-                'Challenged': request.data.get('Challenged'),  # Assuming you send the ID of the challenged RankingItem in the request
-                # You may need to adjust the data based on your actual model structure
+                'Challenged': request.data.get('Challenged'),
             }
 
             serializer = ChallengeSerializer(data=challenge_data)
@@ -266,19 +213,15 @@ class RankingItemViewSet(viewsets.ModelViewSet):
             return Response({"error": str(e)}, status=500)
 
     
-
-
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def current_user_challenging(request):
-    # user = request.user
     print("request")
     print(request.__dict__)
     user_ranking_items = RankingItem.objects.get(Person__user=request.user)
     print("user_ranking_intems")
     Challenges = Challenge.objects.filter(Challenger=user_ranking_items)
     
-    # Challenges = Challenge.objects.filter(Challenger__person__user=user)
     serializer = ChallengeNestedSerializer(Challenges, many=True)
     return Response(serializer.data)
 
@@ -286,29 +229,13 @@ def current_user_challenging(request):
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def current_user_challenges(request):
-    # user = request.user
-    print("request")
-    print(request.__dict__)
     user_ranking_items = RankingItem.objects.get(Person__user=request.user)
-    print("user_ranking_items")
     Challenges = Challenge.objects.filter(Challenged=user_ranking_items)
     
-    # Challenges = Challenge.objects.filter(Challenger__person__user=user)
     serializer = ChallengeNestedSerializer(Challenges, many=True)
     return Response(serializer.data)
 
 
-def getRankingSync(ranking_id):
-    try:
-        ranking = Ranking.objects.prefetch_related('rankings').get(id=ranking_id)
-        serializer = RankingPersonItemsSerializer(ranking)
-        data = serializer.data
-        return data
-    except Ranking.DoesNotExist:
-        raise Exception(f"Ranking with ID {ranking_id} does not exist.")
-    except Exception as e:
-        raise Exception(str(e))
-    
 @sync_to_async  
 def changeChallengeStatus(challenge_id, status):
     try:
@@ -342,11 +269,8 @@ def get_user_from_token(token_string):
  
 @sync_to_async  
 def getChallenging(token):
-    print("challenging")
     user = get_user_from_token(token)
-    print(user)
     user_ranking_items = RankingItem.objects.get(Person__user=user)
-    print("user_ranking_intems")
     Challenges = Challenge.objects.filter(Challenger=user_ranking_items)
     
     serializer = ChallengeNestedSerializer(Challenges, many=True)
@@ -354,16 +278,10 @@ def getChallenging(token):
 
 @sync_to_async  
 def getChallenges(token):
-    print("challenges")
     user = get_user_from_token(token)
-    print(user)
     user_ranking_items = RankingItem.objects.get(Person__user=user)
-    print("user_ranking_items")
     Challenges = Challenge.objects.filter(Challenged=user_ranking_items)
-    
-    # Challenges = Challenge.objects.filter(Challenger__person__user=user)
     serializer = ChallengeNestedSerializer(Challenges, many=True)
-    # Broadcast the ranking update to all connected clients
     return serializer.data
 
 
@@ -376,52 +294,43 @@ COMMANDS = {
 
 }
 async def handler(websocket, path):
-    # Add the new client to the set of connected clients
-    print("path!")
-    print(path)
     connected_clients.add(websocket)
     
     try:
         while True:
             message = await websocket.recv()
             print(f"Received message from client: {message}")
-
-            # RPC (Remote Procedure Call)
             await process_message(websocket, message)
 
     except websockets.ConnectionClosedOK:
         print("Client closed connection")
     finally:
-        # Remove the client from the set when the connection is closed
         connected_clients.remove(websocket)
 
 async def sock(HOST, PORT):
     async with websockets.serve(handler, HOST, PORT):
-        await asyncio.Future()  # run forever
+        await asyncio.Future()  # Roda pra sempre
 
+# ! SRPC ! (Semi-Remote-Procedure-Call))
 async def process_message(websocket, message):
-    # Parse the received message
+    # Parse
     command, *args = message.split()
 
-    # Look up the corresponding function in COMMANDS
     func = COMMANDS.get(command)
 
     if func:
-        # Execute the function with the provided arguments
         result = await func(*args)
         result = json.dumps(result)
-        # Send the result back to the client
+
         await websocket.send(result)
         print(f"Sent response to client: {result}")
     else:
-        # Handle unknown command
         await websocket.send("Unknown command")
 
 async def broadcast_ranking_update():
-    # Get the updated ranking data
+    # Get ranking atualizado (ranking global == 4) 
     updated_ranking_data = await getRanking('4')
 
-    # Broadcast the update to all clients
     for client in connected_clients:
         try:
             await client.send(json.dumps(updated_ranking_data))
@@ -429,39 +338,12 @@ async def broadcast_ranking_update():
         except websockets.ConnectionClosedOK:
             print(f"Failed to broadcast to closed connection: {client}")
 
-def broadcast_ranking_updateSync():
-    # Get the updated ranking data
-    updated_ranking_data = getRankingSync('4')
 
-    # Broadcast the update to all clients
-    for client in connected_clients:
-        try:
-            client.send(json.dumps(updated_ranking_data))
-            print(f"Broadcasted ranking update to client: {client}")
-        except websockets.ConnectionClosedOK:
-            print(f"Failed to broadcast to closed connection: {client}")
-# @api_view(['GET'])
-
-# def make_server_socket(request):
-#     HOST = '127.0.0.1'                 # Symbolic name meaning all available interfaces
-#     PORT = 50010
-#     print("Server is running on {}:{}".format(HOST, PORT))              # Arbitrary non-privileged port
-#     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-#         s.bind((HOST, PORT))
-#         s.listen(1)
-#         conn, addr = s.accept()
-#         with conn:
-#             print('Connected by', addr)
-#             while True:
-#                 data = conn.recv(1024)
-#                 print(data)
-#                 if not data: break
-#                 conn.sendall(data)
-#     return Response("oi",status=status.HTTP_200_OK)
 @api_view(['GET'])
 def make_server_socket(request):
-    HOST = '127.0.0.1'                 # Symbolic name meaning all available interfaces
+    HOST = '127.0.0.1'     
     PORT = 50012
+    print("Running socket on {}:{}".format(HOST, PORT))
     asyncio.run(sock(HOST, PORT))
 
     return Response("oi",status=status.HTTP_200_OK)
@@ -525,3 +407,24 @@ def login_view(request):
         return Response(tokens, status=status.HTTP_200_OK)
 
     return Response({'error': 'Invalid credentials'}, status=status.HTTP_401_UNAUTHORIZED)
+
+
+
+# @api_view(['GET'])
+
+# def make_server_socket(request):
+#     HOST = '127.0.0.1'           
+#     PORT = 50010
+#     print("Server is running on {}:{}".format(HOST, PORT))             
+#     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+#         s.bind((HOST, PORT))
+#         s.listen(1)
+#         conn, addr = s.accept()
+#         with conn:
+#             print('Connected by', addr)
+#             while True:
+#                 data = conn.recv(1024)
+#                 print(data)
+#                 if not data: break
+#                 conn.sendall(data)
+#     return Response("oi",status=status.HTTP_200_OK)
