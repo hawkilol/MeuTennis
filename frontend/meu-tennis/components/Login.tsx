@@ -49,7 +49,6 @@ const Login = () => {
       const access_token = response.data.access;
       const refresh_token = response.data.refresh;
 
-      // Store the token for future requests or user sessions
       console.log(access_token)
 
       storage.setItem('access_token', access_token);
@@ -60,17 +59,15 @@ const Login = () => {
       storage.setItem('username', decodedJWT.username);
       storage.setItem('userid', decodedJWT.user_id);
 
-    //   updateUsername(decodedJWT.username)
-      // e.g., navigation.navigate('MainScreen');
       setSuccessModalVisible(true);
 
-      router.push('/')
+      window.location.reload()
+
 
     } catch (error) {
-      console.log("123")
-      // console.error('Login failed', error);
-      //toast(options); // easy to use
-      //alert('Login Failed', 'Please check your username and password.');
+      console.log("Login Failed")
+      //toast(options); // future
+      alert('Login falhou cheque seu usuario e senha.');
     }
  };
 

@@ -42,11 +42,6 @@ const RegisterPersonScreen = () => {
         },
       });
 
-      // Handle successful registration
-    //   console.log('Registration successful', response);
-    //   alert('Registration Successful');
-
-      // Reset input fields
       setUsername('');
       setPassword('');
       setEmail('');
@@ -54,9 +49,9 @@ const RegisterPersonScreen = () => {
       setStandardGivenName('');
       setStandardFamilyName('');
 
-      // Redirect to login page after successful registration
       setRegisterModalVisible(true)
-      router.push('/');
+      window.location.reload()
+
     } catch (error) {
       console.error('Register failed', error);
       alert('Register Failed');

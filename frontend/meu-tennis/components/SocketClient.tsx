@@ -1,12 +1,12 @@
 class SocketClient {
 
-  constructor(data : string) {
+  constructor() {
     this.isConnected = false;
     this.userId = localStorage.getItem('userid');
     this.serverAddress = 'ws://127.0.0.1:50012/' + this.userId;
     console.log(this.serverAddress)
     // this.connectToServer();
-    this.connectSendRecvStayOpen(data)
+    // this.connectSendRecvStayOpen(data)
   }
 
   connectToServer() {

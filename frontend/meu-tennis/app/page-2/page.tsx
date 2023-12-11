@@ -18,22 +18,18 @@ const ApiTest = () => {
 
 
   // Trocar pra SRPC
-  const startChallenge = async (rankingItemId, Challenged_user_id, challengedName) => {
+
+  const startChallenge = async (challenged_rankingItem_id, challenged_user_id, challengedName) => {
     try {
+      
       const token = localStorage.getItem('access_token');
-      const response = await axios.post(
-        'http://localhost:8000/rankingItem/register_challenge/',
-        {
-          Challenged: rankingItemId,
-          // Temp, o id do usr deve ser pego do rankingItemId no futuro com SRPC
-          Challenged_user_id
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
+      const socketClient = new SocketClient();
+      const data = `makeChallenge ${challenged_rankingItem_id} ${challenged_user_id} ${token}`
+      socketClient.connectSendRecvClose(data)
+      socketClient.client.addEventListener('message', async (event) => {
+        const receivedData = await JSON.parse(event.data);
+        console.log('Received data from server:', receivedData);
+      });
 
       console.log('Challenge started successfully', response.data);
       setChallengedName(challengedName);
@@ -52,8 +48,8 @@ const ApiTest = () => {
   };
 
   const sendMessageSocket = async (data) => {
-    const socketClient = new SocketClient(data);
-
+    const socketClient = new SocketClient();
+    socketClient.connectSendRecvStayOpen(data)
     socketClient.client.addEventListener('message', async (event) => {
 
       const receivedData = await JSON.parse(event.data);

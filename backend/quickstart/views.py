@@ -28,6 +28,8 @@ from django.contrib.auth.models import AnonymousUser
 
 import websockets
 from threading import Thread
+from django.db.models.signals import post_save
+from django.dispatch import receiver
 
 connected_clients = set()
 connected_clients_dict = {}
@@ -203,7 +205,7 @@ class RankingItemViewSet(viewsets.ModelViewSet):
             serializer = ChallengeSerializer(data=challenge_data)
             if serializer.is_valid():
                 serializer.save()
-                # atualiza os desafios do desafiado
+                # difunde atualiza os desafios do desafiado
                 asyncio.run(broadcast_challenge_to_user(request.data.get('Challenged_user_id')))
                 # asyncio.run(broadcast_data_to_user(data, request.user.id))
                 return Response(serializer.data, status=201)
@@ -257,6 +259,20 @@ def changeChallengeStatus(challenge_id, status):
     except Challenge.DoesNotExist:
         print("Challenge not found.")
 
+
+
+@sync_to_async
+def get_user_from_token_async(token_string):
+    try:
+        token = UntypedToken(token_string)
+        user_id = token.payload["user_id"]
+        user = User.objects.get(pk=user_id)
+        return user
+    except Exception as e:
+        print(f"Error decoding token: {e}")
+        return AnonymousUser()
+    
+
 # @sync_to_async
 def get_user_from_token(token_string):
     try:
@@ -267,7 +283,11 @@ def get_user_from_token(token_string):
     except Exception as e:
         print(f"Error decoding token: {e}")
         return AnonymousUser()
- 
+    
+
+
+
+    
 @sync_to_async  
 def getChallenging(token):
     user = get_user_from_token(token)
@@ -300,14 +320,57 @@ def getChallengesFromId(user_id):
     serializer = ChallengeNestedSerializer(Challenges, many=True)
     return serializer.data
 
+@sync_to_async  
+def makeChallenge(challenged_rankingItem_id, challenged_user_id, usr_token):
+        user = get_user_from_token(usr_token)
+
+        try:
+            ranking_item = RankingItem.objects.get(Person__user=user)
+
+            challenge_data = {
+                'Challenger':  ranking_item.id,
+                'Challenged': challenged_rankingItem_id,
+            }
+
+            serializer = ChallengeSerializer(data=challenge_data)
+            if serializer.is_valid():
+                serializer.save()
+                # difunde atualiza os desafios do desafiado
+                # sem asyncio já que vai causar deadlock em single-thread
+                start_thread_broadcast(challenged_user_id)
+
+                return serializer.data
+            return serializer.errors
+        except RankingItem.DoesNotExist:
+            return "RankingItem for the current user does not exist."
+        except Exception as e:
+            return {"error": str(e)}
+
+
+
+
+# async def broadcast_challenge_to_user(challenged_user_id):
+#     # Your coroutine logic goes here
+#     print(f"Broadcasting challenge to user {challenged_user_id}")
+
+def start_thread_broadcast(challenged_user_id):
+    loop = asyncio.new_event_loop()
+    asyncio.set_event_loop(loop)
+
+    async def run_coroutine_in_thread():
+        await broadcast_challenge_to_user(challenged_user_id)
+
+    thread = Thread(target=lambda: asyncio.run(run_coroutine_in_thread()), daemon=True)
+    thread.start()
 
 COMMANDS = {
     "getRanking": getRanking,
     "changeChallengeStatus": changeChallengeStatus,
     "getChallenging": getChallenging,
     "getChallenges": getChallenges,
-
+    "makeChallenge": makeChallenge
 }
+
 async def handler(websocket, path):
     user_id = path[1:]
     print("userid connection from path: ", user_id)
@@ -360,12 +423,11 @@ async def broadcast_ranking_update():
 
 # asyncio.run(broadcast_challenge(user_id, data))
 
-async def broadcast_challenge_to_user(user_id):
+async def broadcast_challenge_to_user(challenged_user_id):
 
     print("broadcast challenge")
-    challenges  = await getChallengesFromUser(user_id)
-    await broadcast_data_to_user(challenges, user_id)
-
+    challenges  = await getChallengesFromUser(challenged_user_id)
+    await broadcast_data_to_user(challenges, challenged_user_id)
 
 async def broadcast_data_to_user(data, user_id):
     websocket = connected_clients_dict.get(str(user_id))
@@ -374,8 +436,7 @@ async def broadcast_data_to_user(data, user_id):
         await websocket.send(message)
         print(f"Broadcasted update to user {user_id}")
     else:
-        print(f"Error to broadcast to {user_id}")
-
+        print(f"Error to broadcast to {user_id}, user probably disconnected")
 
 @api_view(['GET'])
 def make_server_socket(request):

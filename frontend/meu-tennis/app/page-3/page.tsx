@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
 import Wrapper from '@/components/wrapper';
 import SocketClient from '@/components/SocketClient';
 
@@ -9,11 +8,11 @@ const ChallengesScreen = () => {
   const [challenges, setChallenges] = useState([]);
   const [gettingChallenged, setGettingChallenged] = useState([]);
   const [isLoading, setLoading] = useState(true);
-  const localUsername = 'Your Local Username Here';
-
+  const localUsername = '';
+  
   const sendMessageSocket = async (data) => {
-    const socketClient = new SocketClient(data);
-
+    const socketClient = new SocketClient();
+    socketClient.connectSendRecvClose(data)
     socketClient.client.addEventListener('message', async (event) => {
 
       const receivedData = await JSON.parse(event.data);
@@ -25,7 +24,8 @@ const ChallengesScreen = () => {
   const fetchUserChallenges = async () => {
     const token = localStorage.getItem('access_token');
     const data = "getChallenging " + token
-    const socketClient = new SocketClient(data);
+    const socketClient = new SocketClient();
+    socketClient.connectSendRecvStayOpen(data)
 
     socketClient.client.addEventListener('message', async (event) => {
 
@@ -39,7 +39,8 @@ const ChallengesScreen = () => {
   const fetchUserGettingChallenged = async () => {
     const token = localStorage.getItem('access_token');
     const data = "getChallenges " + token
-    const socketClient = new SocketClient(data);
+    const socketClient = new SocketClient();
+    socketClient.connectSendRecvStayOpen(data)
 
     socketClient.client.addEventListener('message', async (event) => {
 
@@ -121,8 +122,8 @@ const ChallengesScreen = () => {
                         key={challenge.id}
                         className={`bg-white p-4 rounded-md shadow-md ${localUsername ===
                             challenge.Challenger.Person.user.username
-                            ? 'border-2 border-blue-500' // Styling for challenger
-                            : 'border-2 border-red-500' // Styling for challenged
+                            ? 'border-2 border-blue-500' // challenger
+                            : 'border-2 border-red-500' // challenged
                           }`}
                       >
                         <p className="text-lg font-semibold mb-2">Desafiante:</p>
@@ -167,8 +168,8 @@ const ChallengesScreen = () => {
                         key={challenge.id}
                         className={`bg-white p-4 rounded-md shadow-md ${localUsername ===
                             challenge.Challenger.Person.user.username
-                            ? 'border-2 border-red-500' // Styling for challenger
-                            : 'border-2 border-blue-500' // Styling for challenged
+                            ? 'border-2 border-red-500' // challenger
+                            : 'border-2 border-blue-500' // challenged
                           }`}
                       >
                         <p className="text-lg font-semibold mb-2">Desafiante:</p>

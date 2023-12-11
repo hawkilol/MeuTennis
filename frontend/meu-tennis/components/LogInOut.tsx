@@ -25,12 +25,9 @@ export default function LogInOut() {
  
       storage.removeItem('username');
       storage.removeItem('userid');
-      //   updateUsername('');  
       setLogoutSuccessModalVisible(true);
-      router.push('/')
-      // alert('Logout!')
+      window.location.reload()
 
-      
     } catch (error) {
       console.error('Logout failed', error);
       alert('Logout Failed')
