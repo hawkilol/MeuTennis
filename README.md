@@ -3,8 +3,7 @@
 ## Build
 
 ### Front-end
- ~~https://reactnative.dev/docs/environment-setup?package-manager=npm&guide=quickstart&os=linux&platform=android~~
- https://react.dev/
+https://react.dev/
  
 ```
 npm install or yarn install
