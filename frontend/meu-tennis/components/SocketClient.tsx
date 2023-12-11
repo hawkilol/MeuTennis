@@ -1,7 +1,10 @@
 class SocketClient {
+
   constructor(data : string) {
     this.isConnected = false;
-    this.serverAddress = 'ws://127.0.0.1:50012';
+    this.userId = localStorage.getItem('userid');
+    this.serverAddress = 'ws://127.0.0.1:50012/' + this.userId;
+    console.log(this.serverAddress)
     // this.connectToServer();
     this.connectSendRecvStayOpen(data)
   }
@@ -13,8 +16,6 @@ class SocketClient {
       console.log('Connected to server!');
       this.isConnected = true;
       
-      // Move the sendData call here, where the connection is established
-      // this.sendData("test data kkkk");
     });
 
     this.client.addEventListener('message', (event) => {

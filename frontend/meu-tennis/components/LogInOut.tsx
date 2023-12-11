@@ -24,6 +24,7 @@ export default function LogInOut() {
       storage.removeItem('refresh_token');
  
       storage.removeItem('username');
+      storage.removeItem('userid');
       //   updateUsername('');  
       setLogoutSuccessModalVisible(true);
       router.push('/')

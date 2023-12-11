@@ -58,4 +58,4 @@ urlpatterns = [
     path('make_server_socket/', views.make_server_socket, name='socket'),
     
 ]
-print("main")
+

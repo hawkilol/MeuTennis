@@ -16,23 +16,17 @@ const ApiTest = () => {
   const [isChallengeSuccessModalVisible, setChallengeSuccessModalVisible] = useState(false);
   const [challengedName, setChallengedName] = useState(null);
 
-  const getRankingData = async () => {
-    try {
 
-    } catch (error) {
-      console.error(error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const startChallenge = async (rankingItemId, challengedName) => {
+  // Trocar pra SRPC
+  const startChallenge = async (rankingItemId, Challenged_user_id, challengedName) => {
     try {
       const token = localStorage.getItem('access_token');
       const response = await axios.post(
         'http://localhost:8000/rankingItem/register_challenge/',
         {
           Challenged: rankingItemId,
+          // Temp, o id do usr deve ser pego do rankingItemId no futuro com SRPC
+          Challenged_user_id
         },
         {
           headers: {
@@ -50,7 +44,7 @@ const ApiTest = () => {
   };
 
   const handleChallengePress = (item) => {
-    startChallenge(item.id, item.Person.StandardGivenName.toString());
+    startChallenge(item.id, item.Person.user.id, item.Person.StandardGivenName.toString());
   };
 
   const handleRefresh = () => {
@@ -71,7 +65,7 @@ const ApiTest = () => {
 
   useEffect(() => {
     sendMessageSocket("getRanking 4");
-    getRankingData();
+    setLoading(false);
   }, []);
 
   return (
