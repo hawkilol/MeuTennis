@@ -1,5 +1,5 @@
 # MeuTennis
-## Sistema Distribuidos
+## Sistemas Distribuidos
 ## Kalil Saldanha Kaliffe / 202004940030
 ## Build
 
